@@ -70,7 +70,9 @@ int kernel_init(void)
 		pr_info("Opening year : %d, Title : %s, Episode number : %d, bkt : %d\n"\
 		,e->year, e->title, e->episode_number,bkt);
 	} 
-
+	
+	pr_info("\n\n");
+	
 	hash_for_each(episodes_table, bkt, e, hash_node) {
 
 		if (e->episode_number == 1 || e->episode_number == 8) {
