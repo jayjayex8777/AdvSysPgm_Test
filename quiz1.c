@@ -6,8 +6,9 @@
 #include <linux/string.h>
 
 struct starwars_movie {
-    int episode;
     int year;
+    int episode;
+    char title[];
     struct list_head list;
 };
 
@@ -19,22 +20,36 @@ int kernel_init(void)
 
     // 스타워즈 에피소드 정보
     int movies[][2] = {
-        {1, 1999},
-        {2, 2002},
-        {3, 2005},
-        {4, 1977},
-        {5, 1980},
-        {6, 1983},
+        {1997, 4},
+        {1980, 5},
+        {1983, 6},
+        {1999, 1},
+        {2002, 2},
+        {2005, 3},
+        {2015, 7},
+        {2017, 8}
     };
+    char title_temp[][100] = {
+        "Star Wars",
+        "The Empire Strikes Back",
+        "Return of the Jedi",
+        "Star Wars: Episode I - The Phantom Menace",
+        "Star Wars: Episode II - Attach of the Clones",
+        "Star Wars: Episode III - Revenge of the Sith",
+        "Star Wars: The Force Awakens",
+        "Star Wars: The Last Jedi"
+    };
+    
     int i;
 
-    for (i = 0; i < sizeof(movies) / sizeof(movies[0]); i++) {
+    for (i = 0; i < 8; i++) {
         struct starwars_movie *new_movie;
         
         // 메모리 할당
         new_movie = kmalloc(sizeof(*new_movie), GFP_KERNEL);
-        new_movie->episode = movies[i][0];
-        new_movie->year = movies[i][1];
+        new_movie->year = movies[i][0];
+        new_movie->episode = movies[i][1];
+        strcpy(new_movie->title,title_temp[i]);
         
         // 리스트에 추가
         list_add_tail(&new_movie->list, &movie_list);
@@ -42,7 +57,7 @@ int kernel_init(void)
 
     struct starwars_movie *movie;
     list_for_each_entry(movie, &movie_list, list) {
-        printk(KERN_INFO "Star Wars Episode %d - Year: %d\n", movie->episode, movie->year);
+        printk(KERN_INFO "Opening year : %d, Title : %s, Episode number : %d\n", movie->year,movie->title,movie->episode);
     }
 
     return 0;
