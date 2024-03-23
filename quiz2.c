@@ -7,7 +7,7 @@
 #include <linux/hashtable.h>
 
 static int movies[][2] = {
-	{1997, 4},
+	{1977, 4},
 	{1980, 5},
 	{1983, 6},
 	{1999, 1},
