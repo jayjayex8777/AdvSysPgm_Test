@@ -41,8 +41,6 @@ static LIST_HEAD(movie_list);
 
 int kernel_init(void)
 {
-    printk(KERN_INFO "Initializing the Starwars module\n");
-
     int i;
 
     for (i = 0; i < TOTAL_NUM_OF_EPISODES; i++) {
