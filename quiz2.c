@@ -66,12 +66,13 @@ int kernel_init(void)
 
 	int bkt = 0;
 
-	hash_for_each(episodes_table, bkt, e, hash_node) {
+	hash_for_each_safe(episodes_table, bkt, tmp, e, hash_node) {
 		pr_info("Opening year : %d, Title : %s, Episode number : %d, bkt : %d\n"\
 		,e->year, e->title, e->episode_number,bkt);
 	} 
 	
-	pr_info("\n\n");
+	pr_info("\n");
+	
 	hash_for_each_possible(episodes_table, e, hash_node, 1){
 
 		if (e->episode_number == 1 || e->episode_number == 8) {
