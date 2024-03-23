@@ -5,58 +5,59 @@
 #include <linux/slab.h>
 #include <linux/string.h>
 
-    
-static int movies[][2] = {
-        {1997, 4},
-        {1980, 5},
-        {1983, 6},
-        {1999, 1},
-        {2002, 2},
-        {2005, 3},
-        {2015, 7},
-        {2017, 8}
-};
-
-static char title_temp[][100] = {
-        "Star Wars",
-        "The Empire Strikes Back",
-        "Return of the Jedi",
-        "Star Wars: Episode I - The Phantom Menace",
-        "Star Wars: Episode II - Attach of the Clones",
-        "Star Wars: Episode III - Revenge of the Sith",
-        "Star Wars: The Force Awakens",
-        "Star Wars: The Last Jedi"
-};
-
-struct starwars_movie {
+struct starwars_episode {
+    int episode_number;
     int year;
-    int episode;
-    char title[100];
-    struct list_head list;
+    struct hlist_node hash_node;
 };
 
-static LIST_HEAD(movie_list);
-
-#define TOTAL_NUM_OF_EPISODES 8  
+#define MAX_EPISODES 8
+DEFINE_HASHTABLE(episodes_table, 2); // 버킷 크기를 4로 설정
 
 int kernel_init(void)
 {
-    int i;
+    printk(KERN_INFO "Initializing the Starwars module\n");
 
-    for (i = 0; i < TOTAL_NUM_OF_EPISODES; i++) {
-        struct starwars_movie *new_movie;
-                
-        new_movie = kmalloc(sizeof(*new_movie), GFP_KERNEL);
-        new_movie->year = movies[i][0];
-        new_movie->episode = movies[i][1];
-        strcpy(new_movie->title,title_temp[i]);
+    // 스타워즈 에피소드 정보
+    int episodes[MAX_EPISODES][2] = {
+        {1, 1999},
+        {2, 2002},
+        {3, 2005},
+        {4, 1977},
+        {5, 1980},
+        {6, 1983},
+        {7, 2015},
+        {8, 2019},
+    };
+
+    int i;
+    struct starwars_episode *episode;
+
+    // 해시 테이블 초기화
+    hash_init(episodes_table);
+
+    // 스타워즈 에피소드 정보를 해시 테이블에 추가
+    for (i = 0; i < MAX_EPISODES; i++) {
+        episode = kmalloc(sizeof(*episode), GFP_KERNEL);
+        if (!episode)
+            return -ENOMEM;
+
+        episode->episode_number = episodes[i][0];
+        episode->year = episodes[i][1];
         
-        list_add_tail(&new_movie->list, &movie_list);
+        // 에피소드 숫자를 해시 값으로 사용하여 해시 테이블에 추가
+        hash_add(episodes_table, &episode->hash_node, episode->episode_number);
     }
 
-    struct starwars_movie *movie;
-    list_for_each_entry(movie, &movie_list, list) {
-        printk(KERN_INFO "Opening year : %d, Title : %s, Episode number : %d\n", movie->year,movie->title,movie->episode);
+    // 해시 테이블을 순회하며 버킷 별로 에피소드 정보 출력
+    struct hlist_node *tmp;
+    struct starwars_episode *e;
+    int bkt;
+    for (bkt = 0; bkt < 2; bkt++) { // 버킷 번호를 0부터 1까지
+        printk(KERN_INFO "Bucket Number: %d\n", bkt);
+        hash_for_each_possible(episodes_table, e, hash_node, bkt) {
+            printk(KERN_INFO "Star Wars Episode %d - Year: %d\n", e->episode_number, e->year);
+        }
     }
 
     return 0;
@@ -64,13 +65,17 @@ int kernel_init(void)
 
 void kernel_exit(void)
 {
-   struct starwars_movie *movie, *tmp;
-    
-    list_for_each_entry_safe(movie, tmp, &movie_list, list) {
-        printk(KERN_INFO "Delete episode : %d\n", movie->episode);
-        list_del(&movie->list);
-        kfree(movie);
+ struct starwars_episode *e;
+    struct hlist_node *tmp;
+    int bkt;
+
+    // 해시 테이블을 순회하며 각 버킷의 모든 요소를 제거하고 메모리 해제
+    hash_for_each(episodes_table, bkt, e, hash_node) {
+        hash_del(&e->hash_node);
+        kfree(e);
     }
+
+    printk(KERN_INFO "Removing the Starwars module\n");
 
 }
 
