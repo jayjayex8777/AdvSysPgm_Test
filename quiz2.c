@@ -53,7 +53,7 @@ int kernel_init(void)
     struct hlist_node *tmp;
     struct starwars_episode *e;
     int bkt;
-    for (bkt = 0; bkt < 2; bkt++) { // 버킷 번호를 0부터 1까지
+    for (bkt = 0; bkt < 3; bkt++) { // 버킷 번호를 0부터 1까지
         printk(KERN_INFO "Bucket Number: %d\n", bkt);
         hash_for_each_possible(episodes_table, e, hash_node, bkt) {
             printk(KERN_INFO "Star Wars Episode %d - Year: %d\n", e->episode_number, e->year);
