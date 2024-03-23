@@ -41,8 +41,6 @@ DEFINE_HASHTABLE(episodes_table, 2); // 버킷 크기를 4로 설정
 
 int kernel_init(void)
 {
-    printk(KERN_INFO "Initializing the Starwars module\n");
-
     int i;
     struct starwars_episode *episode;
 
@@ -66,15 +64,19 @@ int kernel_init(void)
     // 해시 테이블을 순회하며 버킷 별로 에피소드 정보 출력
     struct hlist_node *tmp;
     struct starwars_episode *e;
-    int bkt;
-    for (bkt = 0; bkt < 4; bkt++) { // 버킷 번호를 0부터 1까지
-        printk(KERN_INFO "Bucket Number: %d\n", bkt);
+    int bkt = 0;
+/*  for (bkt = 0; bkt < 4; bkt++) { 
         hash_for_each_possible(episodes_table, e, hash_node, bkt) {
             printk(KERN_INFO "Opening year : %d, Title : %s, Episode number : %d, bkt : %d\n"\
                 ,e->year, e->title, e->episode_number,bkt);
         }
     }
-
+*/
+        hash_for_each_possible(episodes_table, e, hash_node, bkt) {
+        printk(KERN_INFO "Opening year : %d, Title : %s, Episode number : %d, bkt : %d\n"\
+                ,e->year, e->title, e->episode_number,bkt);
+                bkt++;
+        }
     return 0;
 }
 
