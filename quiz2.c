@@ -4,6 +4,7 @@
 #include <linux/list.h>
 #include <linux/slab.h>
 #include <linux/string.h>
+#include <linux/hashtable.h>
 
 struct starwars_episode {
     int episode_number;
