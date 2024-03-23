@@ -12,7 +12,6 @@ struct starwars_movie {
 };
 
 static LIST_HEAD(movie_list);
-struct list_head
 
 int kernel_init(void)
 {
