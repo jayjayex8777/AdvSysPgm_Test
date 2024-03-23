@@ -73,14 +73,24 @@ int kernel_init(void)
 	
 	pr_info("\n");
 	
-	hash_for_each_possible(episodes_table, e, hash_node, 1)
-	pr_info("Opening year : %d, Title : %s, Episode number : %d\n"\
+  	hash_for_each_possible(episodes_table, e, hash_node, 1) {
+	        if (e->episode_number == 1) {
+			pr_info("Opening year : %d, Title : %s, Episode number : %d\n"\
 			,e->year, e->title, e->episode_number);
-
-	hash_for_each_possible(episodes_table, e, hash_node, 8)
-	pr_info("Opening year : %d, Title : %s, Episode number : %d\n"\
-			,e->year, e->title, e->episode_number);	
-
+			
+			break;
+		}
+  	}
+	
+	hash_for_each_possible(episodes_table, e, hash_node, 8) {
+        	if (e->episode_number == 8) {
+			pr_info("Opening year : %d, Title : %s, Episode number : %d\n"\
+			,e->year, e->title, e->episode_number);
+			
+			break;
+		}
+	 }
+	
 	return 0;
 }
 
