@@ -65,12 +65,12 @@ int kernel_init(void)
 
 void kernel_exit(void)
 {
- struct starwars_episode *e;
+   struct starwars_episode *e;
     struct hlist_node *tmp;
     int bkt;
 
     // 해시 테이블을 순회하며 각 버킷의 모든 요소를 제거하고 메모리 해제
-    hash_for_each(episodes_table, bkt, e, hash_node) {
+    hash_for_each_safe(episodes_table, bkt, tmp, e, hash_node) {
         hash_del(&e->hash_node);
         kfree(e);
     }
