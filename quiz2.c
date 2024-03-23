@@ -72,7 +72,7 @@ int kernel_init(void)
         }
     }
 */
-        hash_for_each_possible(episodes_table, e, hash_node, bkt) {
+        hash_for_each_safe(episodes_table, bkt, tmp, e, hash_node) {
         printk(KERN_INFO "Opening year : %d, Title : %s, Episode number : %d, bkt : %d\n"\
                 ,e->year, e->title, e->episode_number,bkt);
                 bkt++;
