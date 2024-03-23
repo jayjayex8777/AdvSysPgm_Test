@@ -54,9 +54,9 @@ int kernel_init(void)
         episode = kmalloc(sizeof(*episode), GFP_KERNEL);
         if (!episode)
             return -ENOMEM;
-
-        episode->episode_number = episodes[i][0];
-        episode->year = episodes[i][1];
+ 
+        episode->year = movies[i][0];
+        episode->episode_number = movies[i][1];       
         strcpy(episode->title,title_temp[i]);
         
         // 에피소드 숫자를 해시 값으로 사용하여 해시 테이블에 추가
