@@ -31,12 +31,13 @@ static char title_temp[][100] = {
 struct starwars_movie {
     int year;
     int episode;
-    char title[];
+    char title[100];
     struct list_head list;
 };
 
 static LIST_HEAD(movie_list);
-    
+
+#define TOTAL_NUM_OF_EPISODES 8  
 
 int kernel_init(void)
 {
@@ -44,7 +45,7 @@ int kernel_init(void)
 
     int i;
 
-    for (i = 0; i < 8; i++) {
+    for (i = 0; i < TOTAL_NUM_OF_EPISODES; i++) {
         struct starwars_movie *new_movie;
                 
         new_movie = kmalloc(sizeof(*new_movie), GFP_KERNEL);
