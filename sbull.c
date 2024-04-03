@@ -69,6 +69,11 @@ static void sbull_transfer(struct sbull_dev *dev, unsigned long sector,
         // TODO: Write code here
         // What is buffer, offset, nbytes, write?
         // Hint: The Linux kernel often uses 'int' as 'bool'
+        if (write) /* transfer user data to the device */
+                memcpy(dev->buf + offset, buffer, nbytes);
+        else /* transfer data in the device to user buffer */
+                memcpy(buffer, dev->buf + offset, nbytes);
+        
 }
 
 /*
