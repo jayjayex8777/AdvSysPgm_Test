@@ -72,7 +72,10 @@ static void sbull_transfer(struct sbull_dev *dev, unsigned long sector,
         if (write) /* transfer user data to the device */
                 memcpy(dev->buf + offset, buffer, nbytes);
         else /* transfer data in the device to user buffer */
+        {
                 memcpy(buffer, dev->buf + offset, nbytes);
+                pr_info ("Reading %d bytes from %ld\n",nbytes,offset);
+        }
         
 }
 
