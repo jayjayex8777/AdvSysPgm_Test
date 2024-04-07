@@ -20,6 +20,7 @@
 #include <linux/blkdev.h>
 #include <linux/buffer_head.h>  /* invalidate_bdev */
 #include <linux/bio.h>
+#include <linux/list.h> // For linked list
 
 MODULE_LICENSE("Dual BSD/GPL");
 
@@ -42,14 +43,17 @@ struct sbull_dev {
         spinlock_t lock;
 
         struct gendisk *gendisk;
+        struct list_head list;
 };
 
 static struct sbull_dev device;
 
 struct sbull_list {
         unsigned long idx;
-        char buf[4096];
+        //char buf[4096];
         // TODO: You can add data needed by the data structure of your choice
+        char *buf;
+        struct list_head list;
 };
 // TODO: You can declare global variables too
 
@@ -72,8 +76,22 @@ static void sbull_transfer(struct sbull_dev *dev, unsigned long sector,
                 pr_err("Beyond-end write (%ld %ld)\n", offset, nbytes);
                 return;
         }
-
         // TODO: Memory allocation, data structure management, kmalloc, memcpy, etc...
+        
+        // Allocate memory for the buffer
+        char *data = kmalloc(nbytes, GFP_KERNEL);
+        if (!data) {
+                pr_err("Failed to allocate memory for buffer\n");
+                return;
+        }
+        // Copy data to/from buffer
+        if (write)
+                memcpy(data, buffer, nbytes);
+        else
+                memcpy(buffer, data, nbytes);
+
+        // Release allocated memory
+        kfree(data);        
 }
 
 /*
@@ -156,6 +174,8 @@ static noinline void setup_device(struct sbull_dev *dev)
         dev->size = nsectors * hardsect_size;
         spin_lock_init(&dev->lock);     /* Initialize spinlock */
 
+        INIT_LIST_HEAD(&dev->list); // Initialize linked list
+        
         /* gendisk structure */
         dev->gendisk = blk_alloc_disk(NUMA_NO_NODE);
         if (!dev->gendisk) {
