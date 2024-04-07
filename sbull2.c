@@ -42,6 +42,7 @@ struct sbull_dev {
         spinlock_t lock;
 
         struct gendisk *gendisk;
+        struct sbull_list *list_head;  // Added list_head member
 };
 
 static struct sbull_dev device;
