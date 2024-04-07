@@ -43,17 +43,17 @@ struct sbull_dev {
         spinlock_t lock;
 
         struct gendisk *gendisk;
-        struct list_head list;
+//        struct list_head list;
 };
 
 static struct sbull_dev device;
 
 struct sbull_list {
         unsigned long idx;
-        //char buf[4096];
+        char buf[4096];
         // TODO: You can add data needed by the data structure of your choice
-        char *buf;
-        struct list_head list;
+      //  char *buf;
+     //   struct list_head list;
 };
 // TODO: You can declare global variables too
 
@@ -77,7 +77,7 @@ static void sbull_transfer(struct sbull_dev *dev, unsigned long sector,
                 return;
         }
         // TODO: Memory allocation, data structure management, kmalloc, memcpy, etc...
-        
+        /*
         // Allocate memory for the buffer
         char *data = kmalloc(nbytes, GFP_KERNEL);
         if (!data) {
@@ -91,7 +91,8 @@ static void sbull_transfer(struct sbull_dev *dev, unsigned long sector,
                 memcpy(buffer, data, nbytes);
 
         // Release allocated memory
-        kfree(data);        
+        kfree(data);       
+        */
 }
 
 /*
@@ -174,7 +175,7 @@ static noinline void setup_device(struct sbull_dev *dev)
         dev->size = nsectors * hardsect_size;
         spin_lock_init(&dev->lock);     /* Initialize spinlock */
 
-        INIT_LIST_HEAD(&dev->list); // Initialize linked list
+       // INIT_LIST_HEAD(&dev->list); // Initialize linked list
         
         /* gendisk structure */
         dev->gendisk = blk_alloc_disk(NUMA_NO_NODE);
