@@ -248,6 +248,8 @@ static int __init sbull_init(void)
 static void sbull_exit(void)
 {
         struct sbull_dev *dev = &device;
+        struct sbull_list *tmp, *next;
+
 
   list_for_each_entry_safe(tmp, next, &dev->data_list, list) {
         list_del(&tmp->list);
