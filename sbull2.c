@@ -188,8 +188,7 @@ static noinline void setup_device(struct sbull_dev *dev)
 
         ret = add_disk(dev->gendisk);
         if (ret != 0) {
-                pr_err("Failed to add sbull device: %d\n", ret);
-                goto out_vfree;
+                pr_err("Failed to add sbull device: %d\n", ret);                
         }
 
         return;
