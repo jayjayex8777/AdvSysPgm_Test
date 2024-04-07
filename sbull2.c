@@ -3,26 +3,26 @@
 #include <linux/init.h>
 
 #include <linux/sched.h>
-#include <linux/kernel.h>       /* printk() */
-#include <linux/slab.h>         /* kmalloc() */
-#include <linux/fs.h>           /* everything... */
-#include <linux/errno.h>        /* error codes */
+#include <linux/kernel.h>
+#include <linux/slab.h>
+#include <linux/fs.h>
+#include <linux/errno.h>
 #include <linux/timer.h>
-#include <linux/types.h>        /* size_t */
-#include <linux/fcntl.h>        /* O_ACCMODE */
-#include <linux/hdreg.h>        /* HDIO_GETGEO */
+#include <linux/types.h>
+#include <linux/fcntl.h>
+#include <linux/hdreg.h>
 #include <linux/kdev_t.h>
 #include <linux/vmalloc.h>
 #include <linux/blkdev.h>
-#include <linux/buffer_head.h>  /* invalidate_bdev */
+#include <linux/buffer_head.h>
 #include <linux/bio.h>
-#include <linux/list.h>         /* linked list */
+#include <linux/list.h>
 
 MODULE_LICENSE("Dual BSD/GPL");
 
 static int sbull_major = 0;
 static int hardsect_size = 512;
-static int nsectors = 1024 * 1024; /* How big the drive is */
+static int nsectors = 1024 * 1024; // How big the drive is
 
 #define KERNEL_SECTOR_SIZE 512
 
@@ -31,16 +31,16 @@ struct sbull_dev {
     int users;
     spinlock_t lock;
     struct gendisk *gendisk;
-    struct list_head data_list; // List head
-};
-
-struct sbull_data {
-    struct list_head list; // Linked list
-    unsigned long sector;  // Sector number
-    char data[4096];       // Data buffer
+    struct list_head data_list; // Head of the linked list for data management
 };
 
 static struct sbull_dev device;
+
+struct sbull_data {
+    struct list_head list;
+    unsigned long sector; // Sector number
+    void *data; // Data buffer
+};
 
 static inline unsigned int bio_cur_bytes(struct bio *bio) {
     if (bio_has_data(bio))
@@ -51,43 +51,49 @@ static inline unsigned int bio_cur_bytes(struct bio *bio) {
 
 static void sbull_transfer(struct sbull_dev *dev, unsigned long sector,
                            unsigned long nsect, char *buffer, int write) {
-    struct list_head *ptr;
-    struct sbull_data *data;
+    struct sbull_data *ptr, *next;
     unsigned long offset = sector * KERNEL_SECTOR_SIZE;
     unsigned long nbytes = nsect * KERNEL_SECTOR_SIZE;
+    bool found = false;
 
-    list_for_each(ptr, &dev->data_list) {
-        data = list_entry(ptr, struct sbull_data, list);
-        if (data->sector == sector) {
-            if (write) memcpy(data->data, buffer, nbytes);
-            else memcpy(buffer, data->data, nbytes);
-            return;
+    list_for_each_entry_safe(ptr, next, &dev->data_list, list) {
+        if (ptr->sector == sector) {
+            if (write)
+                memcpy(ptr->data, buffer, nbytes);
+            else
+                memcpy(buffer, ptr->data, nbytes);
+            found = true;
+            break;
         }
     }
-
-    // Sector not found, so allocate new
-    data = kmalloc(sizeof(struct sbull_data), GFP_KERNEL);
-    if (!data) {
-        pr_err("sbull: out of memory\n");
-        return;
+    
+    if (!found && write) {
+        ptr = kmalloc(sizeof(struct sbull_data), GFP_KERNEL);
+        if (!ptr) {
+            pr_err("sbull: Out of memory\n");
+            return;
+        }
+        ptr->data = kmalloc(nbytes, GFP_KERNEL);
+        if (!ptr->data) {
+            kfree(ptr);
+            pr_err("sbull: Out of memory for data\n");
+            return;
+        }
+        memcpy(ptr->data, buffer, nbytes);
+        ptr->sector = sector;
+        list_add_tail(&ptr->list, &dev->data_list);
     }
-    data->sector = sector;
-    if (write) memcpy(data->data, buffer, nbytes);
-    list_add(&data->list, &dev->data_list);
 }
 
 static int sbull_xfer_bio(struct sbull_dev *dev, struct bio *bio) {
-    struct bvec_iter iter;
     struct bio_vec bvec;
-    sector_t sector = bio->bi_iter.bi_sector;
-
+    struct bvec_iter iter;
     bio_for_each_segment(bvec, bio, iter) {
         char *buffer = kmap_atomic(bvec.bv_page) + bvec.bv_offset;
-        sbull_transfer(dev, sector, bio_cur_bytes(bio) >> 9, buffer, bio_data_dir(bio) == WRITE);
-        sector += bio_cur_bytes(bio) >> 9;
+        sbull_transfer(dev, bio->bi_iter.bi_sector, bio_cur_bytes(bio) >> 9, buffer, bio_data_dir(bio) == WRITE);
         kunmap_atomic(buffer);
     }
-    return 0; /* Always "succeed" */
+    return 0; // Always "succeed"
 }
 
 static void sbull_make_request(struct bio *bio) {
@@ -125,16 +131,16 @@ static void setup_device(struct sbull_dev *dev) {
 
     dev->gendisk = blk_alloc_disk(NUMA_NO_NODE);
     if (!dev->gendisk) {
-        pr_err("sbull: alloc_disk failure\n");
+        pr_info("alloc_disk failure\n");
         return;
     }
 
+    dev->gendisk->queue = blk_alloc_queue(GFP_KERNEL);
+    blk_queue_make_request(dev->gendisk->queue, sbull_make_request);
     dev->gendisk->major = sbull_major;
     dev->gendisk->first_minor = 0;
     dev->gendisk->minors = 1;
     dev->gendisk->fops = &sbull_ops;
-    dev->gendisk->queue = blk_alloc_queue(GFP_KERNEL);
-    blk_queue_make_request(dev->gendisk->queue, sbull_make_request);
     dev->gendisk->private_data = dev;
     snprintf(dev->gendisk->disk_name, 32, "sbull0");
     set_capacity(dev->gendisk, nsectors);
@@ -142,11 +148,12 @@ static void setup_device(struct sbull_dev *dev) {
 }
 
 static int __init sbull_init(void) {
-    sbull_major = register_blkdev(sbull_major, "sbull");
+    sbull_major = register_blkdev(0, "sbull");
     if (sbull_major <= 0) {
         pr_err("sbull: unable to get major number\n");
         return -EBUSY;
     }
+
     setup_device(&device);
     return 0;
 }
@@ -157,6 +164,7 @@ static void __exit sbull_exit(void) {
 
     list_for_each_entry_safe(tmp, next, &dev->data_list, list) {
         list_del(&tmp->list);
+        kfree(tmp->data);
         kfree(tmp);
     }
 
@@ -167,3 +175,4 @@ static void __exit sbull_exit(void) {
 
 module_init(sbull_init);
 module_exit(sbull_exit);
+
