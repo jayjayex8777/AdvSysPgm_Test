@@ -49,9 +49,8 @@ static struct sbull_dev device;
 struct sbull_list {
         unsigned long idx;
         char buf[4096];
-        // TODO: You can add data needed by the data structure of your choice
+        struct sbull_list *next;
 };
-// TODO: You can declare global variables too
 
 static inline unsigned int bio_cur_bytes(struct bio *bio)
 {
@@ -74,6 +73,27 @@ static void sbull_transfer(struct sbull_dev *dev, unsigned long sector,
         }
 
         // TODO: Memory allocation, data structure management, kmalloc, memcpy, etc...
+        struct sbull_list *new_node = kmalloc(sizeof(struct sbull_list), GFP_KERNEL);
+        if (!new_node) {
+                pr_err("Failed to allocate memory for sbull_list\n");
+                return;
+        }
+
+        new_node->idx = sector;
+        memcpy(new_node->buf, buffer, nbytes);
+        new_node->next = NULL;
+
+        // Insert new_node into the linked list
+        spin_lock(&dev->lock);
+        if (!dev->list_head) {
+                dev->list_head = new_node;
+        } else {
+                ptr = dev->list_head;
+                while (ptr->next)
+                        ptr = ptr->next;
+                ptr->next = new_node;
+        }
+        spin_unlock(&dev->lock);
 }
 
 /*
@@ -207,7 +227,8 @@ static int __init sbull_init(void)
 
         setup_device(&device);
 
-        // TODO: You can add data structure initialization here if needed
+        // Initialize list_head
+        device.list_head = NULL;
 
         return 0;
 }
@@ -215,6 +236,15 @@ static int __init sbull_init(void)
 static void sbull_exit(void)
 {
         struct sbull_dev *dev = &device;
+        struct sbull_list *ptr, *next;
+
+        // Free allocated memory in the linked list
+        ptr = dev->list_head;
+        while (ptr) {
+                next = ptr->next;
+                kfree(ptr);
+                ptr = next;
+        }
 
         if (dev->gendisk) {
                 del_gendisk(dev->gendisk);
@@ -226,4 +256,3 @@ static void sbull_exit(void)
 
 module_init(sbull_init);
 module_exit(sbull_exit);
-
