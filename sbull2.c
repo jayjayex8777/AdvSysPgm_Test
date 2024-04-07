@@ -23,6 +23,7 @@
 #include <linux/blkdev.h>
 #include <linux/buffer_head.h>  /* invalidate_bdev */
 #include <linux/bio.h>
+#include <linux/list.h>
 
 MODULE_LICENSE("Dual BSD/GPL");
 
@@ -45,14 +46,15 @@ struct sbull_dev {
         spinlock_t lock;
 
         struct gendisk *gendisk;
+        struct list_head data_list;
 };
 
 static struct sbull_dev device;
 
 struct sbull_list {
-        unsigned long idx;
-        char buf[4096];
-        // TODO: You can add data needed by the data structure of your choice
+    struct list_head list;
+    unsigned long sector;
+    char data[4096];
 };
 // TODO: You can declare global variables too
 
@@ -64,12 +66,20 @@ static inline unsigned int bio_cur_bytes(struct bio *bio)
                 return bio->bi_iter.bi_size;
 }
 
+static struct sbull_list* sbull_find_list(struct sbull_dev *dev, unsigned long sector) {
+    struct sbull_list *tmp;
+    list_for_each_entry(tmp, &dev->data_list, list) {
+        if (tmp->sector == sector) return tmp;
+    }
+    return NULL;
+}
+
 static void sbull_transfer(struct sbull_dev *dev, unsigned long sector,
                            unsigned long nsect, char *buffer, int write)
 {
         unsigned long offset = sector * KERNEL_SECTOR_SIZE;
         unsigned long nbytes = nsect * KERNEL_SECTOR_SIZE;
-        struct sbull_list *ptr;
+        struct sbull_list *tmp;
 
         if ((offset + nbytes) > dev->size) {
                 pr_err("Beyond-end write (%ld %ld)\n", offset, nbytes);
@@ -77,6 +87,24 @@ static void sbull_transfer(struct sbull_dev *dev, unsigned long sector,
         }
 
         // TODO: Memory allocation, data structure management, kmalloc, memcpy, etc...
+        tmp = sbull_find_list(dev, sector);
+        if (!tmp && write) {
+                tmp = kmalloc(sizeof(struct sbull_list), GFP_KERNEL);
+                if (!tmp) {
+                    pr_err("sbull: Out of memory\n");
+            return;
+        }
+        memset(tmp->data, 0, 4096);
+        tmp->sector = sector;
+        list_add_tail(&tmp->list, &dev->data_list);
+    }
+
+    if (tmp) {
+        if (write)
+            memcpy(tmp->data, buffer, nbytes);
+        else
+            memcpy(buffer, tmp->data, nbytes);
+    }
 }
 
 /*
@@ -158,7 +186,9 @@ static noinline void setup_device(struct sbull_dev *dev)
         memset(dev, 0, sizeof(struct sbull_dev));
         dev->size = nsectors * hardsect_size;
         spin_lock_init(&dev->lock);     /* Initialize spinlock */
-
+        
+        INIT_LIST_HEAD(&dev->data_list);
+        
         /* gendisk structure */
         dev->gendisk = blk_alloc_disk(NUMA_NO_NODE);
         if (!dev->gendisk) {
@@ -219,12 +249,14 @@ static void sbull_exit(void)
 {
         struct sbull_dev *dev = &device;
 
-        if (dev->gendisk) {
-                del_gendisk(dev->gendisk);
-                put_disk(dev->gendisk);
-        }
+  list_for_each_entry_safe(tmp, next, &dev->data_list, list) {
+        list_del(&tmp->list);
+        kfree(tmp);
+    }
 
-        unregister_blkdev(sbull_major, "sbull");
+    del_gendisk(dev->gendisk);
+    put_disk(dev->gendisk);
+    unregister_blkdev(sbull_major, "sbull");
 }
 
 module_init(sbull_init);
