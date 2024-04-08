@@ -54,7 +54,7 @@ static struct sbull_dev device;
 struct sbull_list {
     struct list_head list;
     unsigned long idx;
-    char data[4096];
+    char buf[4096];
 };
 // TODO: You can declare global variables too
 
@@ -94,7 +94,7 @@ static void sbull_transfer(struct sbull_dev *dev, unsigned long sector,
                     pr_err("sbull: Out of memory\n");
             return;
         }
-        memset(tmp->data, 0, 4096);
+        memset(tmp->buf, 0, 4096);
         tmp->idx = sector;
         list_add_tail(&tmp->list, &dev->data_list);
     }
@@ -102,10 +102,10 @@ static void sbull_transfer(struct sbull_dev *dev, unsigned long sector,
     if (tmp) {
         if (write){
 			pr_info("Writing %ld bytes from buffer \n");
-            memcpy(tmp->data, buffer, nbytes);
+            memcpy(tmp->buf, buffer, nbytes);
         }
         else{
-            memcpy(buffer, tmp->data, nbytes);
+            memcpy(buffer, tmp->buf, nbytes);
         }
     }
 }
