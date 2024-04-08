@@ -101,11 +101,12 @@ static void sbull_transfer(struct sbull_dev *dev, unsigned long sector,
 
     if (tmp) {
         if (write){
-			pr_info("Writing %ld bytes from buffer \n");
-            memcpy(tmp->buf, buffer, nbytes);
+			pr_info("Writing %ld bytes from buffer(%ld)\n",nbytes,buffer);
+			memcpy(tmp->buf, buffer, nbytes);
         }
         else{
             memcpy(buffer, tmp->buf, nbytes);
+			pr_info("Reading %ld bytes from tmp buf(%ld)\n",nbytes,tmp->buf);
         }
     }
 }
