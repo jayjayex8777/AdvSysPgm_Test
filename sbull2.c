@@ -53,7 +53,7 @@ static struct sbull_dev device;
 
 struct sbull_list {
     struct list_head list;
-    unsigned long sector;
+    unsigned long idx;
     char data[4096];
 };
 // TODO: You can declare global variables too
@@ -69,7 +69,7 @@ static inline unsigned int bio_cur_bytes(struct bio *bio)
 static struct sbull_list* sbull_find_list(struct sbull_dev *dev, unsigned long sector) {
     struct sbull_list *tmp;
     list_for_each_entry(tmp, &dev->data_list, list) {
-        if (tmp->sector == sector) return tmp;
+        if (tmp->idx == sector) return tmp;
     }
     return NULL;
 }
@@ -95,15 +95,18 @@ static void sbull_transfer(struct sbull_dev *dev, unsigned long sector,
             return;
         }
         memset(tmp->data, 0, 4096);
-        tmp->sector = sector;
+        tmp->idx = sector;
         list_add_tail(&tmp->list, &dev->data_list);
     }
 
     if (tmp) {
-        if (write)
+        if (write){
+			pr_info("Writing %ld bytes from buffer \n");
             memcpy(tmp->data, buffer, nbytes);
-        else
+        }
+        else{
             memcpy(buffer, tmp->data, nbytes);
+        }
     }
 }
 
