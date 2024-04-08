@@ -1,8 +1,6 @@
 
 
 
-
-
 /*
  * Sample disk driver, from the beginning.
  */
@@ -56,7 +54,7 @@ static struct sbull_dev device;
 struct sbull_list {
     struct list_head list;
     unsigned long sector;
-    char buf[4096];
+    char data[4096];
 };
 // TODO: You can declare global variables too
 
@@ -96,16 +94,16 @@ static void sbull_transfer(struct sbull_dev *dev, unsigned long sector,
                     pr_err("sbull: Out of memory\n");
             return;
         }
-        memset(tmp->buf, 0, 4096);
+        memset(tmp->data, 0, 4096);
         tmp->sector = sector;
         list_add_tail(&tmp->list, &dev->data_list);
     }
 
     if (tmp) {
         if (write)
-            memcpy(tmp->buf, buffer, nbytes);
+            memcpy(tmp->data, buffer, nbytes);
         else
-            memcpy(buffer, tmp->buf, nbytes);
+            memcpy(buffer, tmp->data, nbytes);
     }
 }
 
