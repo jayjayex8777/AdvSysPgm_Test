@@ -56,7 +56,10 @@ struct sbull_list {
     unsigned long idx;
     char buf[4096];
 };
+
 // TODO: You can declare global variables too
+unsigned long idx_tmp=0;
+
 
 static inline unsigned int bio_cur_bytes(struct bio *bio)
 {
@@ -73,7 +76,13 @@ static struct sbull_list* sbull_find_list(struct sbull_dev *dev, unsigned long s
     }
     return NULL;
 }
-
+static int max_return(int x, int y)
+{
+	if (x > y)
+		return x;
+	else
+		return y;
+}
 static void sbull_transfer(struct sbull_dev *dev, unsigned long sector,
                            unsigned long nsect, char *buffer, int write)
 {
@@ -99,14 +108,16 @@ static void sbull_transfer(struct sbull_dev *dev, unsigned long sector,
         list_add_tail(&tmp->list, &dev->data_list);
     }
 
-    if (tmp) {
+	idx_tmp = max_return(idx_tmp,tmp->idx);
+
+	if (tmp) {
         if (write){
-			pr_info("Writing %ld bytes on the memory(%p) for idx =%ld\n",nbytes,tmp,tmp->idx);
+			pr_info("Writing %ld bytes on the memory(%lp) for idx =%ld\n",nbytes,tmp,idx_tmp);
 			memcpy(tmp->buf, buffer, nbytes);
         }
         else{
             memcpy(buffer, tmp->buf, nbytes);
-			pr_info("Reading %ld bytes on the memory(%p) for idx =%ld\n",nbytes,tmp,tmp->idx);
+			pr_info("Reading %ld bytes on the memory(%lp) for idx =%ld\n",nbytes,tmp,idx_tmp);
         }
     }
 }
