@@ -81,9 +81,6 @@ MODULE_LICENSE("GPL");
 
 
 
-
-
-
 /******************************************************************************
 
                             Online C Compiler.
@@ -94,7 +91,7 @@ Write your code in this editor and press "Run" button to compile and execute it.
 
 #include <stdio.h>
 #if 1
-int func_A(int n) 
+long int func_A(int n) 
 {    
   int result = 1;    
 
@@ -106,15 +103,15 @@ int func_A(int n)
 
 int main() 
 {    
-  int number = 10;    
+  long int number = 10;    
 
-  printf("%d ! = %d\n", number, func_A(number));    
+  printf("%ld ! = %ld\n", number, func_A(number));    
 
   return 0;
 }
 
 #else
-int func_A(int n) 
+long int func_A(int n) 
 {    
     if (n <= 1) {
         return 1;    
@@ -126,11 +123,12 @@ int func_A(int n)
 
 int main() 
 {    
-    long int number = 10000000; 
+    long int number = 10; 
 
-    printf("%ld ! = %d\n", number, func_A(number));    
+    printf("Recurssive %ld ! = %ld\n", number, func_A(number));    
     
     return 0;
 }
 
 #endif
+
