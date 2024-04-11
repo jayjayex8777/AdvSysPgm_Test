@@ -78,3 +78,59 @@ module_init(kernel_init);
 module_exit(kernel_exit);
 
 MODULE_LICENSE("GPL");  
+
+
+
+
+
+
+/******************************************************************************
+
+                            Online C Compiler.
+                Code, Compile, Run and Debug C program online.
+Write your code in this editor and press "Run" button to compile and execute it.
+
+*******************************************************************************/
+
+#include <stdio.h>
+#if 1
+int func_A(int n) 
+{    
+  int result = 1;    
+
+  for(int i = n; i > 0; i--) {
+        result *= i;    
+   }    
+   return result;
+}
+
+int main() 
+{    
+  int number = 10;    
+
+  printf("%d ! = %d\n", number, func_A(number));    
+
+  return 0;
+}
+
+#else
+int func_A(int n) 
+{    
+    if (n <= 1) {
+        return 1;    
+    } 
+    else { 
+      return n * func_A(n - 1);
+    }
+}
+
+int main() 
+{    
+    long int number = 10000000; 
+
+    printf("%ld ! = %d\n", number, func_A(number));    
+    
+    return 0;
+}
+
+#endif
