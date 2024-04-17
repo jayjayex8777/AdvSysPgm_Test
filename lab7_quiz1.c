@@ -4,6 +4,7 @@
 #include <linux/delay.h>
 
 static struct task_struct *thread_st;
+static int example_thread;
 // Function executed by kernel thread
 static int thread_fn(void *unused)
 {
