@@ -13,7 +13,6 @@ static int thread_fn(void *unused)
                 pr_info("Thread running\n");
                 ssleep(5);  // 5초 동안 대기
         }
-    printk(KERN_INFO "Thread stopping\n");
     return 0;
 }
 
@@ -23,11 +22,7 @@ static int __init init_thread(void)
         // create timer thread
         printk(KERN_INFO "Creating thread\n");
         example_thread = kthread_run(thread_fn, NULL, "example_thread");
-        if (IS_ERR(example_thread)) {
-                printk(KERN_ALERT "Failed to create the thread, returned %ld\n", PTR_ERR(example_thread));
-        return PTR_ERR(example_thread);
-        }
-    
+   
     return 0;
 }
 
@@ -35,11 +30,8 @@ static int __init init_thread(void)
 static void __exit cleanup_thread(void)
 {
         // stop kernel thread
-        printk(KERN_INFO "Example Module: Exiting\n");
-        if (example_thread) {
-                kthread_stop(example_thread);
-                printk(KERN_INFO "Example Thread: Successfully stopped\n");
-        }
+        kthread_stop(example_thread);
+        printk(KERN_INFO "thread stopped\n");
 }
 
 MODULE_LICENSE("GPL");
