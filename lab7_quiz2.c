@@ -34,8 +34,7 @@ static int producer(void *arg)
 	int i;
 
 	for (i = 0; i < ITEMS; i++) {
-		sbuf_insert(sbufs, i);
-		pr_info("Inserted %d\n", i);
+		sbuf_insert(sbufs, i);	
 	}
 	
 	pr_info("Producer Done");
@@ -45,17 +44,27 @@ static int producer(void *arg)
 
 static int consumer(void *arg)
 {
-	// remove 30 items and print each item
-	int i, item;
+    int i, item;
 
-	for (i = 0; i < ITEMS; i++) {
-		item = sbuf_remove(sbufs);
-		pr_info("Removed %d\n", item);
-	}
+    if (!sbufs) {
+        pr_alert("Consumer: sbufs is NULL, exiting thread\n");
+        return -1;  // sbufs가 NULL이면 함수를 안전하게 종료
+    }
 
-	pr_info("Consumer Done");
-	
-	return 0;
+    for (i = 0; i < ITEMS; i++) {
+        // sbufs의 유효성을 다시 확인
+        if (!sbufs) {
+            pr_alert("Consumer: sbufs became NULL during execution, exiting thread\n");
+            return -1;  // 반복문 도중 sbufs가 NULL이 되면 함수를 종료
+        }
+
+        item = sbuf_remove(sbufs);  // 아이템 제거
+        pr_info("Removed %d\n", item);
+    }
+
+    pr_info("Consumer Done");
+    return 0;
+
 }
 
 static int simple_init(void)
@@ -85,11 +94,7 @@ static void simple_exit(void)
             printk(KERN_INFO "Producer thread stopped successfully\n");
         }
     }
-    if (sbufs) {
-        sbuf_deinit(sbufs);
-        kfree(sbufs);
-        printk(KERN_INFO "FIFO buffer freed\n");
-    }
+
     if (cthreads) {
         printk(KERN_INFO "Stopping consumer thread\n");
         if (kthread_stop(cthreads) != -EINTR) {
@@ -97,7 +102,11 @@ static void simple_exit(void)
         }
     }
 
-
+    if (sbufs) {
+        sbuf_deinit(sbufs);
+        kfree(sbufs);
+        printk(KERN_INFO "FIFO buffer freed\n");
+    }
 
     printk(KERN_INFO "Exiting sbuf example module\n");
 }
