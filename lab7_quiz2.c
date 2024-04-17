@@ -79,21 +79,27 @@ static int simple_init(void)
 static void simple_exit(void)
 {
 	// deinit sbuf
-	if (pthreads) {
-		kthread_stop(pthreads);
-		pr_info("pthread stopped\n");
-	}
+   if (pthreads) {
+        printk(KERN_INFO "Stopping producer thread\n");
+        if (kthread_stop(pthreads) != -EINTR) {
+            printk(KERN_INFO "Producer thread stopped successfully\n");
+        }
+    }
 
-	if (cthreads) {
-		kthread_stop(cthreads);
-		pr_info("cthread stopped\n");
-	}
+    if (cthreads) {
+        printk(KERN_INFO "Stopping consumer thread\n");
+        if (kthread_stop(cthreads) != -EINTR) {
+            printk(KERN_INFO "Consumer thread stopped successfully\n");
+        }
+    }
 
-	if (sbufs) {
-		sbuf_deinit(sbufs);
-		kfree(sbufs);
-	}
+    if (sbufs) {
+        sbuf_deinit(sbufs);
+        kfree(sbufs);
+        printk(KERN_INFO "FIFO buffer freed\n");
+    }
 
+    printk(KERN_INFO "Exiting sbuf example module\n");
 }
 
 module_init(simple_init);
