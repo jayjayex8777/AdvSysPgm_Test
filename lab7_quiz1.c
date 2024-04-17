@@ -13,6 +13,7 @@ static int thread_fn(void *unused)
                 pr_info("Thread running\n");
                 ssleep(5);  // 5초 동안 대기
         }
+        pr_info("Cleaning up\n");
     return 0;
 }
 
