@@ -4,7 +4,7 @@
 #include <linux/delay.h>
 
 static struct task_struct *thread_st;
-static int example_thread;
+
 // Function executed by kernel thread
 static int thread_fn(void *unused)
 {
@@ -21,7 +21,7 @@ static int __init init_thread(void)
 {
         // create timer thread
         printk(KERN_INFO "Creating thread\n");
-        example_thread = kthread_run(thread_fn, NULL, "example_thread");
+        thread_st = kthread_run(thread_fn, NULL, "thread_st");
    
     return 0;
 }
@@ -30,7 +30,7 @@ static int __init init_thread(void)
 static void __exit cleanup_thread(void)
 {
         // stop kernel thread
-        kthread_stop(example_thread);
+        kthread_stop(thread_st);
         printk(KERN_INFO "thread stopped\n");
 }
 
