@@ -37,7 +37,9 @@ static int producer(void *arg)
 		sbuf_insert(sbufs, i);
 		pr_info("Inserted %d\n", i);
 	}
-
+	
+	pr_info("Producer Done");
+	
 	return 0;
 }
 
@@ -51,6 +53,8 @@ static int consumer(void *arg)
 		pr_info("Removed %d\n", item);
 	}
 
+	pr_info("Consumer Done");
+	
 	return 0;
 }
 
