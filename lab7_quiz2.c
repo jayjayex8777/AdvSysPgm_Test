@@ -62,10 +62,15 @@ static int consumer(void *arg)
 static int producer(void *arg)
 {
 	// insert 0-29 integers
-	int i;
+	int i=0;
 
 	while(!kthread_should_stop()){
-	
+		if(i<ITEMS){
+			sbuf_insert(sbufs, i);
+			pr_info("inserted item %d to buf %d\n", i, *(sbufs->buf));
+
+			i++;
+		}
 
 	}
 	
@@ -76,11 +81,16 @@ static int producer(void *arg)
 
 static int consumer(void *arg)
 {
-    int i, item;
+    int i=30, item;
 	
 	while(!kthread_should_stop()){
-	
+		if(i>0){
 
+	        item = sbuf_remove(sbufs);  // 아이템 제거
+       	    pr_info("Removed item %d from buf %d\n", i, *(sbufs->buf));
+
+			i--;
+		}
 	}
     
 	pr_info("Consumer Done");
