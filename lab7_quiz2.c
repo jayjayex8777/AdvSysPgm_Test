@@ -35,7 +35,7 @@ static int producer(void *arg)
 
 	for (i = 0; i < ITEMS; i++) {
 		sbuf_insert(sbufs, i);
-		pr_info("inserted item %d to buf %d\n", item, *(sbufs->buf));
+		pr_info("inserted item %d to buf %d\n", i, *(sbufs->buf));
 	}
 	
 	pr_info("Producer Done");
