@@ -1,0 +1,60 @@
+6,722,1708154462,-;Producer Done
+6,723,1708154542,-;Removed 27 ,sbuf=00000000ceb19762
+6,724,1708154545,-;Removed 28 ,sbuf=00000000ceb19762
+6,725,1708154546,-;Consumer Done
+6,726,1920879489,-;Stopping producer thread
+4,727,1920879802,-;------------[ cut here ]------------
+4,728,1920879804,-;WARNING: CPU: 1 PID: 3224 at kernel/kthread.c:537 __kthread_bind+0x3d/0xe0
+4,729,1920879816,-;Modules linked in: quiz2(OE-) sbuf(OE) snd_seq_dummy snd_hrtimer binfmt_misc intel_rapl_msr intel_rapl_common intel_uncore_frequency_common snd_intel8x0 snd_ac97_codec ac97_bus snd_pcm snd_seq_midi crct10dif_pclmul nls_iso8859_1 snd_seq_midi_event snd_rawmidi polyval_generic ghash_clmulni_intel sha256_ssse3 sha1_ssse3 snd_seq aesni_intel crypto_simd snd_seq_device snd_timer cryptd vmwgfx rapl snd drm_ttm_helper ttm drm_kms_helper i2c_piix4 soundcore vboxguest joydev input_leds serio_raw mac_hid msr parport_pc ppdev lp parport drm efi_pstore dmi_sysfs ip_tables x_tables autofs4 hid_generic usbhid hid ahci crc32_pclmul video psmouse e1000 pata_acpi libahci wmi [last unloaded: sbuf(OE)]
+4,730,1920879874,-;CPU: 1 PID: 3224 Comm: rmmod Tainted: G           OE      6.5.0-27-generic #28-Ubuntu
+4,731,1920879877,-;Hardware name: innotek GmbH VirtualBox/VirtualBox, BIOS VirtualBox 12/01/2006
+4,732,1920879878,-;RIP: 0010:__kthread_bind+0x3d/0xe0
+4,733,1920879882,-;Code: 55 4c 8d 68 01 41 54 49 89 fc 53 89 f3 48 83 ec 08 49 83 fd 42 0f 83 8b 00 00 00 89 d6 4c 89 e7 e8 a8 09 02 00 48 85 c0 75 1d <0f> 0b 48 83 c4 08 5b 41 5c 41 5d 41 5e 41 5f 5d 31 c0 31 d2 31 f6
+4,734,1920879883,-;RSP: 0018:ffffa849c66abd38 EFLAGS: 00010246
+4,735,1920879885,-;RAX: 0000000000000000 RBX: 0000000000000006 RCX: 0000000000000000
+4,736,1920879886,-;RDX: 0000000000000000 RSI: 0000000000000000 RDI: 0000000000000000
+4,737,1920879887,-;RBP: ffffa849c66abd68 R08: 0000000000000000 R09: 0000000000000000
+4,738,1920879888,-;R10: 0000000000000000 R11: 0000000000000000 R12: ffff93592a3ac8c0
+4,739,1920879889,-;R13: 0000000000000007 R14: 0000000000000000 R15: 0000000000000000
+4,740,1920879890,-;FS:  00007b49cd52a040(0000) GS:ffff935a1bc40000(0000) knlGS:0000000000000000
+4,741,1920879891,-;CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+4,742,1920879893,-;CR2: 000064fbbfff9f68 CR3: 000000002d450000 CR4: 00000000000106e0
+4,743,1920879895,-;Call Trace:
+4,744,1920879897,-; <TASK>
+4,745,1920879902,-; ? show_regs+0x6d/0x80
+4,746,1920879907,-; ? __warn+0x89/0x160
+4,747,1920879910,-; ? __kthread_bind+0x3d/0xe0
+4,748,1920879913,-; ? report_bug+0x17e/0x1b0
+4,749,1920879917,-; ? handle_bug+0x51/0xa0
+4,750,1920879921,-; ? exc_invalid_op+0x18/0x80
+4,751,1920879922,-; ? asm_exc_invalid_op+0x1b/0x20
+4,752,1920879929,-; ? __kthread_bind+0x3d/0xe0
+4,753,1920879931,-; ? __kthread_bind+0x38/0xe0
+4,754,1920879933,-; ? vprintk_default+0x1d/0x30
+4,755,1920879938,-; kthread_unpark+0x59/0x70
+4,756,1920879940,-; kthread_stop+0x56/0x190
+4,757,1920879944,-; simple_exit+0x2b/0xc0 [quiz2]
+4,758,1920879948,-; __do_sys_delete_module.isra.0+0x1a0/0x300
+4,759,1920879953,-; __x64_sys_delete_module+0x12/0x20
+4,760,1920879956,-; do_syscall_64+0x59/0x90
+4,761,1920879959,-; ? exit_to_user_mode_loop+0xe5/0x130
+4,762,1920879960,-; ? exit_to_user_mode_prepare+0x30/0xb0
+4,763,1920879962,-; ? syscall_exit_to_user_mode+0x37/0x60
+4,764,1920879965,-; ? do_syscall_64+0x68/0x90
+4,765,1920879968,-; ? exit_to_user_mode_prepare+0x30/0xb0
+4,766,1920879969,-; ? syscall_exit_to_user_mode+0x37/0x60
+4,767,1920879972,-; ? do_syscall_64+0x68/0x90
+4,768,1920879974,-; ? exit_to_user_mode_prepare+0x30/0xb0
+4,769,1920879975,-; ? syscall_exit_to_user_mode+0x37/0x60
+4,770,1920879977,-; ? do_syscall_64+0x68/0x90
+4,771,1920879980,-; entry_SYSCALL_64_after_hwframe+0x6e/0xd8
+4,772,1920879982,-;RIP: 0033:0x7b49ccd2963b
+4,773,1920880001,-;Code: 73 01 c3 48 8b 0d dd 47 0d 00 f7 d8 64 89 01 48 83 c8 ff c3 66 2e 0f 1f 84 00 00 00 00 00 90 f3 0f 1e fa b8 b0 00 00 00 0f 05 <48> 3d 01 f0 ff ff 73 01 c3 48 8b 0d ad 47 0d 00 f7 d8 64 89 01 48
+4,774,1920880002,-;RSP: 002b:00007fff3cb880c8 EFLAGS: 00000206 ORIG_RAX: 00000000000000b0
+4,775,1920880004,-;RAX: ffffffffffffffda RBX: 000064fbbffee760 RCX: 00007b49ccd2963b
+4,776,1920880005,-;RDX: 0000000000000000 RSI: 0000000000000800 RDI: 000064fbbffee7c8
+4,777,1920880006,-;RBP: 0000000000000000 R08: 1999999999999999 R09: 0000000000000000
+4,778,1920880007,-;R10: 00007b49ccda6aa0 R11: 0000000000000206 R12: 00007fff3cb88320
+4,779,1920880007,-;R13: 000064fbbffee760 R14: 000064fbbffee2a0 R15: 0000000000000000
+4,780,1920880009,-; </TASK>
+4,781,1920880010,-;---[ end trace 0000000000000000 ]---
