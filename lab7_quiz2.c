@@ -23,8 +23,8 @@ extern int sbuf_remove(sbuf_t * sp);
 #define NUM_SBUF 1
 #define NUM_THREADS 1
 
-static struct task_struct *pthreads;
-static struct task_struct *cthreads;
+static struct task_struct *producer_thread;
+static struct task_struct *consumer_thread;
 
 sbuf_t *sbufs = NULL;
 
@@ -34,7 +34,8 @@ static int producer(void *arg)
 	int i;
 
 	for (i = 0; i < ITEMS; i++) {
-		sbuf_insert(sbufs, i);	
+		sbuf_insert(sbufs, i);
+		pr_info("inserted item %d to buf %d\n", item, *(sbufs->buf));
 	}
 	
 	pr_info("Producer Done");
@@ -45,24 +46,14 @@ static int producer(void *arg)
 static int consumer(void *arg)
 {
     int i, item;
-
-    if (!sbufs) {
-        pr_alert("Consumer: sbufs is NULL, exiting thread\n");
-        return -1;  // sbufs가 NULL이면 함수를 안전하게 종료
-    }
-
+	
     for (i = 0; i < ITEMS; i++) {
-        // sbufs의 유효성을 다시 확인
-        if (!sbufs) {
-            pr_alert("Consumer: sbufs became NULL during execution, exiting thread\n");
-            return -1;  // 반복문 도중 sbufs가 NULL이 되면 함수를 종료
-        }
-
         item = sbuf_remove(sbufs);  // 아이템 제거
-        pr_info("Removed %d\n", item);
+        pr_info("Removed item %d from buf %d\n", item, *(sbufs->buf));
     }
-
-    pr_info("Consumer Done");
+    
+	pr_info("Consumer Done");
+	
     return 0;
 
 }
@@ -77,10 +68,11 @@ static int simple_init(void)
 		pr_err("Failed to allocate memory for sbufs\n");
 		return -ENOMEM;
 	}
+	
 	sbuf_init(sbufs, SBUFSIZE);
 
-	pthreads = kthread_run(producer, NULL, "producer_thread");
-	cthreads = kthread_run(consumer, NULL, "consumer_thread");
+	producer_thread = kthread_run(producer, NULL, "producer_thread");
+	consumer_thread = kthread_run(consumer, NULL, "consumer_thread");
 
 	return 0;
 }
@@ -88,27 +80,12 @@ static int simple_init(void)
 static void simple_exit(void)
 {
 	// deinit sbuf
-   if (pthreads) {
-        printk(KERN_INFO "Stopping producer thread\n");
-        if (kthread_stop(pthreads) != -EINTR) {
-            printk(KERN_INFO "Producer thread stopped successfully\n");
-        }
-    }
-
-    if (cthreads) {
-        printk(KERN_INFO "Stopping consumer thread\n");
-        if (kthread_stop(cthreads) != -EINTR) {
-            printk(KERN_INFO "Consumer thread stopped successfully\n");
-        }
-    }
-
     if (sbufs) {
         sbuf_deinit(sbufs);
         kfree(sbufs);
-        printk(KERN_INFO "FIFO buffer freed\n");
+        pr_info("buffer freed\n");
     }
 
-    printk(KERN_INFO "Exiting sbuf example module\n");
 }
 
 module_init(simple_init);
@@ -117,3 +94,4 @@ module_exit(simple_exit);
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Simple Module");
 MODULE_AUTHOR("KOO");
+
