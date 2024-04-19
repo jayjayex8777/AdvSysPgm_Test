@@ -31,19 +31,20 @@ sbuf_t *sbufs = NULL;
 static int producer(void *arg)
 {
 	// insert 0-29 integers
-	int i=1;
+	int cnt=1;
 
 	while(!kthread_should_stop()){
-		if(i<=ITEMS){
-			sbuf_insert(sbufs, i);
-			pr_info("inserted item %d to buf %d\n", i, *(sbufs->buf));
+		if(cnt <= ITEMS){
+			sbuf_insert(sbufs, cnt);
+			//pr_info("inserted item %d to buf %d\n", cnt, *(sbufs->buf));
 
-			i++;
+			cnt++;
 		}
 		else {
 			pr_info("Producer Done");
-			break;
+		//	break;
 		}
+		msleep(100);
 	}
 	
 	return 0;
@@ -51,20 +52,22 @@ static int producer(void *arg)
 
 static int consumer(void *arg)
 {
-    int i=1, item;
+    int cnt=1, item;
 	
 	while(!kthread_should_stop()){
-		if(i<=ITEMS){
+		if(cnt <= ITEMS){
 
 	        item = sbuf_remove(sbufs);  // 아이템 제거
-       	    pr_info("Removed item %d (cnt %d)\n", item, i);
+       	    pr_info("Removed item %d (cnt %d)\n", item, cnt);
 
-			i++;
+			cnt++;
 		}
 		else {
 
 			pr_info("Consumer Done");
-			break;
+//			break;
+			msleep(100);
+
 		}
 	}
     
