@@ -5,6 +5,7 @@
 #include <linux/slab.h>
 #include <linux/delay.h>
 
+
 #include "sbuf.h"
 
 /* create an empty, bounded, shared FIFO buffer with n slots */
@@ -42,14 +43,16 @@ static int producer(void *arg)
 			cnt++;
 		}
 		else {
-	
-		//	break;
-		}
+			
+			pr_info("Producer Done");
 
-		msleep(100);
+			break;		
+		}
+		
+//		msleep(100);
 	}
 
-	pr_info("Producer Done");
+
 	return 0;
 	
 }
@@ -61,21 +64,21 @@ static int consumer(void *arg)
 	while(!kthread_should_stop()){
 		if(cnt <= ITEMS){
 
-	        item = sbuf_remove(sbufs);  // 아이템 제거
-       	    pr_info("Removed item %d (cnt %d)\n", item, cnt);
+	        item = sbuf_remove(sbufs);
+       	    pr_info("consumer item %d = %d\n", item, cnt);
 
 			cnt++;
 		}
 		else {
+			
+			pr_info("Consumer Done");
 
-//			break;
+			break;		
 		}
 
-
-		msleep(100);
+//		msleep(100);
 	}
 
-	pr_info("Consumer Done");
     return 0;
 
 }
@@ -107,7 +110,7 @@ static void simple_exit(void)
         kfree(sbufs);
         pr_info("buffer freed\n");
     }
-	
+/*
 	if(producer_thread){
 		kthread_stop(producer_thread);
 		pr_info("producer_thread_stopped successfully\n");
@@ -117,7 +120,7 @@ static void simple_exit(void)
 		kthread_stop(consumer_thread);
 		pr_info("producer_thread_stopped successfully\n");
 	}
-		
+*/	
 }
 
 module_init(simple_init);
