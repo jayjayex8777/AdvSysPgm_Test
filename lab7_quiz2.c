@@ -41,14 +41,16 @@ static int producer(void *arg)
 			cnt++;
 		}
 		else {
-			pr_info("Producer Done");
+	
 		//	break;
 		}
 
 		msleep(100);
 	}
-	
+
+	pr_info("Producer Done");
 	return 0;
+	
 }
 
 static int consumer(void *arg)
@@ -65,13 +67,14 @@ static int consumer(void *arg)
 		}
 		else {
 
-			pr_info("Consumer Done");
 //			break;
 		}
 
+
 		msleep(100);
 	}
-    
+
+	pr_info("Consumer Done");
     return 0;
 
 }
