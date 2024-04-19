@@ -28,37 +28,6 @@ static struct task_struct *consumer_thread;
 
 sbuf_t *sbufs = NULL;
 
-#if 0
-static int producer(void *arg)
-{
-	// insert 0-29 integers
-	int i;
-
-	for (i = 0; i < ITEMS; i++) {
-		sbuf_insert(sbufs, i);
-		pr_info("inserted item %d to buf %d\n", item, *(sbufs->buf));
-	}
-	
-	pr_info("Producer Done");
-	
-	return 0;
-}
-
-static int consumer(void *arg)
-{
-    int i, item;
-	
-    for (i = 0; i < ITEMS; i++) {
-        item = sbuf_remove(sbufs);  // 아이템 제거
-        pr_info("Removed item %d from buf %d\n", i, *(sbufs->buf));
-    }
-    
-	pr_info("Consumer Done");
-	
-    return 0;
-
-}
-#else
 static int producer(void *arg)
 {
 	// insert 0-29 integers
@@ -71,10 +40,11 @@ static int producer(void *arg)
 
 			i++;
 		}
-
+		else {
+			pr_info("Producer Done");
+			break;
+		}
 	}
-	
-	pr_info("Producer Done");
 	
 	return 0;
 }
@@ -87,19 +57,21 @@ static int consumer(void *arg)
 		if(i<=ITEMS){
 
 	        item = sbuf_remove(sbufs);  // 아이템 제거
-       	    pr_info("Removed item %d from buf %d\n", i, *(sbufs->buf));
+       	    pr_info("Removed item %d (cnt %d)\n", item, i);
 
 			i++;
 		}
+		else {
+
+			pr_info("Consumer Done");
+			break;
+		}
 	}
     
-	pr_info("Consumer Done");
-	
     return 0;
 
 }
 
-#endif
 static int simple_init(void)
 {
 	// init 1 sbuf
