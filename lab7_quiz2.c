@@ -3,6 +3,7 @@
 #include <linux/kernel.h>
 #include <linux/kthread.h>
 #include <linux/slab.h>
+#include <linux/delay.h>
 
 #include "sbuf.h"
 
