@@ -44,6 +44,7 @@ static int producer(void *arg)
 			pr_info("Producer Done");
 		//	break;
 		}
+
 		msleep(100);
 	}
 	
@@ -66,9 +67,9 @@ static int consumer(void *arg)
 
 			pr_info("Consumer Done");
 //			break;
-			msleep(100);
-
 		}
+
+		msleep(100);
 	}
     
     return 0;
