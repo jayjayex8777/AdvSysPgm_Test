@@ -27,6 +27,9 @@ static int producer(void *arg)
        
        sbuf_insert(&sbufs[buf_index], i);
     }
+
+    pr_info("Producer Done\n");
+    
     return 0;
 }
 
