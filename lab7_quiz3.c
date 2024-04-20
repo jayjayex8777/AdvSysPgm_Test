@@ -47,9 +47,11 @@ static int producer(void *arg)
 
 		sbuf_insert(&sbufs[buf_index], i);
 		for(int j=0;j<4;j++){
+			pr_info("Buffer Queue[%d] : ",j);
 			for(int k=0; k<3; k++){
-				pr_info("Value %d on the buf queue[%d]\n",sbufs[j].buf[k],j);
+				pr_info(" %d ",sbufs[j].buf[k]);
 			}
+			pr_info("\n");
 		}
 	}
 
