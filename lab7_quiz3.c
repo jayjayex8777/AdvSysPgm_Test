@@ -36,17 +36,20 @@ static int producer(void *arg)
 {
         // insert 0-14 integers to a queue
         // the queue is randomly seledted
+   return 0;
 }
 
 static int consumer(void *arg)
 {
         // remove 30 items and print each item
+   return 0;
 }
 
 static int simple_init(void)
 {
         // init 4 sbuf
         // create 2 producer, 1 consumer
+   return 0;
 }
 
 static void simple_exit(void)
