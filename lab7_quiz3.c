@@ -38,10 +38,16 @@ static int producer(void *arg)
     for (i = 0; i < 15; i++) {
        get_random_bytes(&buf_index, sizeof(buf_index));
        
-       if(buf_index < 0)
-          buf_index = buf_index % NUM_SBUF;
+       if(buf_index < 0){
+          buf_index = - buf_index;
+       }
+       
+       buf_index = buf_index % NUM_SBUF;
        
        sbuf_insert(&sbufs[buf_index], i);
+       for(int j;j<SBUFSIZE;j++){
+          pr_info("Cnt %d : Inserted %d \n",i,*(sbufs[buf_index]->buf[j]));
+       }
     }
 
     pr_info("Producer Done\n");
