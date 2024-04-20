@@ -74,8 +74,10 @@ static int consumer(void *arg)
 			}
 		}	
 	}
+
+	pr_info("Consumer Done\n");
 	
-    return 0;
+	return 0;
 }
 
 static int simple_init(void)
