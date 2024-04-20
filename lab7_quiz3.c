@@ -55,7 +55,7 @@ static int producer(void *arg)
 
 static int consumer(void *arg)
 {
-    int item, count = 0;
+	int item, count = 0;
 	
 	while (count < ITEMS) {
 		int buf_index;
@@ -65,7 +65,7 @@ static int consumer(void *arg)
 			item = sbuf_tryremove(&sbufs[buf_index]);
 
 			if (item != -1) {
-				pr_info("Consumed: %d from buffer %d\n", item, buf_index);
+				pr_info("Consumed item %d = %d from queue %d\n",cnt,item,buf_index);
 
 				count++;
 
