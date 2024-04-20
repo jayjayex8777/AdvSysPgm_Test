@@ -7,6 +7,22 @@
 
 #include "sbuf.h"
 
+/* create an empty, bounded, shared FIFO buffer with n slots */
+extern void sbuf_init(sbuf_t * sp, int n);
+
+/* clean up buffer sp */
+extern void sbuf_deinit(sbuf_t * sp);
+
+/* insert item onto the rear of shared buffer sp */
+extern void sbuf_insert(sbuf_t * sp, int item);
+
+/* remove and return the first item from buffer sp */
+extern int sbuf_remove(sbuf_t * sp);
+
+/* if there is items in buffer, remove and return the first item from buffer sp.
+   if not, return -1, immediately */
+extern int sbuf_tryremove(sbuf_t * sp);
+
 #define ITEMS 30
 #define SBUFSIZE 3
 #define NUM_SBUF 4
@@ -14,7 +30,7 @@
 
 static struct task_struct *pthreads[NUM_THREADS];
 static struct task_struct *cthread;
-static sbuf_t *sbufs;
+sbuf_t *sbufs = NULL;
 
 static int producer(void *arg)
 {
