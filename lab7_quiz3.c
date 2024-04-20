@@ -65,7 +65,7 @@ static int consumer(void *arg)
 			item = sbuf_tryremove(&sbufs[buf_index]);
 
 			if (item != -1) {
-				pr_info("Consumed item %d = %d from queue %d\n",cnt,item,buf_index);
+				pr_info("Consumed item %d = %d from queue %d\n",count,item,buf_index);
 
 				count++;
 
