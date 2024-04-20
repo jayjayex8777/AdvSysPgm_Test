@@ -46,7 +46,11 @@ static int producer(void *arg)
 		buf_index = buf_index % NUM_SBUF; 		
 
 		sbuf_insert(&sbufs[buf_index], i);
-		pr_info("Cnt %d: Inserted %d on the buf queue[%d]\n",i,*(sbufs[buf_index]->buf+(i%3)),buf_index);
+		for(int j=0;j<4;j++){
+			for(int k=0; k<3; k++){
+				pr_info("Value %d on the buf queue[%d]\n",sbufs[j].buf[k],j);
+			}
+		}
 	}
 
 	pr_info("Producer Done\n");
