@@ -48,7 +48,7 @@ static int producer(void *arg)
 		buf_index = buf_index % NUM_SBUF; 		
 
 		sbuf_insert(&sbufs[buf_index], i);
-		pr_info("Inserting %d\n",i);
+		pr_info("Inserting %d by producer_thread[%d]\n",i,thread_id);
 		for(int j=0;j<4;j++){
 			pr_info("Buffer Queue[%d] : ",j);
 			for(int k=0; k<3; k++){
