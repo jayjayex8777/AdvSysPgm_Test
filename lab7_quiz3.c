@@ -103,7 +103,7 @@ static int consumer(void *arg)
 	}
 #endif
 	
-#if 1	
+#if 0
 	for(int j=0;j<4;j++){
 		pr_info("Buffer Queue[%d] : ",j);
 		
@@ -146,8 +146,7 @@ static void simple_exit(void)
     }
 	
     kfree(sbufs);
-
-	
+		
 #if 0
     for (i = 0; i < NUM_THREADS; i++) {
         if (pthreads[i])
