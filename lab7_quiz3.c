@@ -52,7 +52,7 @@ static int producer(void *arg)
 		buf_index = buf_index % NUM_SBUF; 		
 
 		sbuf_insert(&sbufs[buf_index], i);
-if(0){
+#if 0
 		pr_info("Inserting %d by producer_thread[%d]\n",i,thread_id);
 		for(int j=0;j<4;j++){
 			pr_info("Buffer Queue[%d] : ",j);
@@ -62,7 +62,7 @@ if(0){
 			pr_info("\n");
 		}
 		pr_info("\n");
-}
+#endif
 	}
 
 	pr_info("Producer Done\n");
@@ -73,8 +73,7 @@ if(0){
 static int consumer(void *arg)
 {
 	int item, count = 0;
-	int j , k;
-	
+		
 	while (count < ITEMS) {
 		int buf_index;
 
@@ -94,34 +93,28 @@ static int consumer(void *arg)
 	}
 
 	pr_info("Consumer Done\n");
-	
+
+#if 1
 	for(count=0; count<ITEMS; count++){
-		pr_info("buf_val_array[%d] = %d\n",count,buf_val_array[count]);
+		buf_val_count[buf_val_array[count]]++;		
 	}
-	for(j=0; j<ITEMS; j++){
-		buf_val_count[buf_val_array[j]]++;		
-	}
-	for (k=0; k<15; k++){
-		pr_info("buf val %d = evicted %d times\n",k,buf_val_count[k]);
+	for (count=0; count<15; count++){
+		pr_info("buf val %d = evicted %d times\n",count,buf_val_count[count]);
 		
 	}
-	for(count=0; count<ITEMS; count++){
-		pr_info("test_val[%d] = %d\n",count,test_val[count]);
-	}
-
+#endif
 	
-	
-if(0){
-	for(j=0;j<4;j++){
+#if 1	
+	for(int j=0;j<4;j++){
 		pr_info("Buffer Queue[%d] : ",j);
 		
-		for(k=0; k<3; k++){
+		for(int k=0; k<3; k++){
 			pr_info(" %d ",sbufs[j].buf[k]);
 		}
 		pr_info("\n");
 	}
 	pr_info("\n");
-}	
+#endif	
 	return 0;
 }
 
