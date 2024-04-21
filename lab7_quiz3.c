@@ -95,7 +95,7 @@ static int consumer(void *arg)
 	pr_info("Consumer Done\n");
 	
 	for(count=0; count<ITEMS; count++){
-		pr_info("buf_val_array[%d] = %d\n",buf_val_array[count]);
+		pr_info("buf_val_array[%d] = %d\n",count,buf_val_array[count]);
 	}
 	for(j=0; j<ITEMS; j++){
 		buf_val_count[buf_val_array[j]]++;		
