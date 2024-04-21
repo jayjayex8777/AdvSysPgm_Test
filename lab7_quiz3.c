@@ -142,7 +142,7 @@ static void simple_exit(void)
     int i;
     for (i = 0; i < NUM_SBUF; i++) {
         sbuf_deinit(&sbufs[i]);
-		pr_info("sbufs freed all\n");
+		pr_info("sbufs[%d] freed\n",i);
     }
 	
     kfree(sbufs);
