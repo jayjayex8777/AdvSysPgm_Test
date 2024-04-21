@@ -31,10 +31,12 @@ extern int sbuf_tryremove(sbuf_t * sp);
 static struct task_struct *pthreads[NUM_THREADS];
 static struct task_struct *cthread;
 sbuf_t *sbufs = NULL;
+static int thread_ids[NUM_THREADS]; 
 
 static int producer(void *arg)
 {
 	int i, buf_index;
+	int thread_id = *(int*)arg;
 
 	for (i = 0; i < 15; i++) {
 		get_random_bytes(&buf_index, sizeof(buf_index));
@@ -100,7 +102,8 @@ static int simple_init(void)
 	}
 
 	for (i = 0; i < NUM_THREADS; i++) {
-		pthreads[i] = kthread_run(producer, NULL, "producer_thread_%d", i);
+		thread_ids[i] = i;
+		pthreads[i] = kthread_run(producer, &thread_ids[i], "producer_thread_%d", i);
 	}
 
 	cthread = kthread_run(consumer, NULL, "consumer_thread");
