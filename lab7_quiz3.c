@@ -33,8 +33,8 @@ static struct task_struct *cthread;
 sbuf_t *sbufs = NULL;
 static int thread_ids[NUM_THREADS];
 
-static int buf_val_array[30] = {0,};
-static int buf_val_count[30] = {0,};
+static int buf_val_array[30];
+static int buf_val_count[30];
 
 static int producer(void *arg)
 {
