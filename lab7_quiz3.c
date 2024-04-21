@@ -35,6 +35,7 @@ static int thread_ids[NUM_THREADS];
 
 static int buf_val_array[30] = {0,};
 static int buf_val_count[30] = {0,};
+static int test_val[30] = {-1,};
 
 static int producer(void *arg)
 {
@@ -104,6 +105,11 @@ static int consumer(void *arg)
 		pr_info("buf val %d = evicted %d times\n",k,buf_val_count[k]);
 		
 	}
+	for(count=0; count<ITEMS; count++){
+		pr_info("test_val[%d] = %d\n",count,test_val[count]);
+	}
+
+	
 	
 if(0){
 	for(j=0;j<4;j++){
