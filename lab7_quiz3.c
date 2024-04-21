@@ -31,7 +31,10 @@ extern int sbuf_tryremove(sbuf_t * sp);
 static struct task_struct *pthreads[NUM_THREADS];
 static struct task_struct *cthread;
 sbuf_t *sbufs = NULL;
-static int thread_ids[NUM_THREADS]; 
+static int thread_ids[NUM_THREADS];
+
+static int buf_val_array[30] = {-1,};
+static int buf_val_count[30] = {-1,};
 
 static int producer(void *arg)
 {
@@ -67,6 +70,7 @@ static int producer(void *arg)
 static int consumer(void *arg)
 {
 	int item, count = 0;
+	int j , k;
 	
 	while (count < ITEMS) {
 		int buf_index;
@@ -77,7 +81,7 @@ static int consumer(void *arg)
 
 			if (item != -1) {
 				pr_info("Consumed item %d = %d from queue %d\n",count,item,buf_index);
-
+				buf_val_array[count] = item;
 				count++;
 
 				if (count >= ITEMS)
@@ -88,16 +92,25 @@ static int consumer(void *arg)
 
 	pr_info("Consumer Done\n");
 
-	for(int j=0;j<4;j++){
+	for(j=0; j<ITEMS; j++){
+		buf_val_count[buf_val_array[j]]++;		
+	}
+	for (k=0; k<ITEMS; k++){
+		pr_info("buf val %d = %d times\n",k,buf_val_count[k]);
+		
+	}
+	
+if(0){
+	for(j=0;j<4;j++){
 		pr_info("Buffer Queue[%d] : ",j);
 		
-		for(int k=0; k<3; k++){
+		for(k=0; k<3; k++){
 			pr_info(" %d ",sbufs[j].buf[k]);
 		}
 		pr_info("\n");
 	}
 	pr_info("\n");
-	
+}	
 	return 0;
 }
 
