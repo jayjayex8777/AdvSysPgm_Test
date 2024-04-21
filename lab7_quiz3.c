@@ -53,6 +53,7 @@ static int producer(void *arg)
 			}
 			pr_info("\n");
 		}
+		pr_info("\n");
 	}
 
 	pr_info("Producer Done\n");
