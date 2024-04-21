@@ -35,12 +35,11 @@ static int thread_ids[NUM_THREADS];
 
 static int buf_val_array[30] = {0,};
 static int buf_val_count[30] = {0,};
-static int test_val[30] = {-1,};
 
 static int producer(void *arg)
 {
 	int i, buf_index;
-	int thread_id = *(int*)arg;
+//	int thread_id = *(int*)arg;
 
 	for (i = 0; i < 15; i++) {
 		get_random_bytes(&buf_index, sizeof(buf_index));
