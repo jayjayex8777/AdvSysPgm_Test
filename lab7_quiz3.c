@@ -94,11 +94,12 @@ static int consumer(void *arg)
 	pr_info("Consumer Done\n");
 
 #if 1
+	pr_info("\n");
 	for(count=0; count<ITEMS; count++){
 		buf_val_count[buf_val_array[count]]++;		
 	}
 	for (count=0; count<15; count++){
-		pr_info("buf val %d = evicted %d times\n",count,buf_val_count[count]);
+		pr_info("buf val %d = removed %d times\n",count,buf_val_count[count]);
 		
 	}
 #endif
@@ -146,7 +147,7 @@ static void simple_exit(void)
     }
 	
     kfree(sbufs);
-		
+
 #if 0
     for (i = 0; i < NUM_THREADS; i++) {
         if (pthreads[i])
