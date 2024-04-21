@@ -87,6 +87,16 @@ static int consumer(void *arg)
 	}
 
 	pr_info("Consumer Done\n");
+
+	for(int j=0;j<4;j++){
+		pr_info("Buffer Queue[%d] : ",j);
+		
+		for(int k=0; k<3; k++){
+			pr_info(" %d ",sbufs[j].buf[k]);
+		}
+		pr_info("\n");
+	}
+	pr_info("\n");
 	
 	return 0;
 }
