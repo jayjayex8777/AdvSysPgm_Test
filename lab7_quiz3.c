@@ -33,8 +33,8 @@ static struct task_struct *cthread;
 sbuf_t *sbufs = NULL;
 static int thread_ids[NUM_THREADS];
 
-static int buf_val_array[30] = {-1,};
-static int buf_val_count[30] = {-1,};
+static int buf_val_array[30] = {0,};
+static int buf_val_count[30] = {0,};
 
 static int producer(void *arg)
 {
@@ -95,13 +95,13 @@ static int consumer(void *arg)
 	pr_info("Consumer Done\n");
 	
 	for(count=0; count<ITEMS; count++){
-		pr_info("buf_val = %d\n",buf_val_array[count]);
+		pr_info("buf_val_array[%d] = %d\n",buf_val_array[count]);
 	}
 	for(j=0; j<ITEMS; j++){
-		++buf_val_count[buf_val_array[j]];		
+		buf_val_count[buf_val_array[j]]++;		
 	}
 	for (k=0; k<15; k++){
-		pr_info("buf val %d = %d times\n",k,buf_val_count[k]);
+		pr_info("buf val %d = evicted %d times\n",k,buf_val_count[k]);
 		
 	}
 	
