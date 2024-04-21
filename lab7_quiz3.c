@@ -93,11 +93,14 @@ static int consumer(void *arg)
 	}
 
 	pr_info("Consumer Done\n");
-
-	for(j=0; j<ITEMS; j++){
-		buf_val_count[buf_val_array[j]]++;		
+	
+	for(count=0; count<ITEMS; count++){
+		pr_info("buf_val = %d\n",buf_val_array[count]);
 	}
-	for (k=0; k<ITEMS; k++){
+	for(j=0; j<ITEMS; j++){
+		++buf_val_count[buf_val_array[j]];		
+	}
+	for (k=0; k<15; k++){
 		pr_info("buf val %d = %d times\n",k,buf_val_count[k]);
 		
 	}
