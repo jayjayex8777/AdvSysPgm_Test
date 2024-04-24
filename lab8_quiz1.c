@@ -43,8 +43,13 @@ irqreturn_t irq_handler(int irq, void *dev_id)
  */
 static int __init irq_ex_init(void)
 {
+    int ret;
+
+    pr_info("irq_ex_init done\n");
     // Request shared IRQ 1 for the keyboard
-    return request_irq(KEYBOARD_IRQ, irq_handler, IRQF_SHARED, "keyboard_irq_handler", (void *)(irq_handler));
+    ret = request_irq(KEYBOARD_IRQ, irq_handler, IRQF_SHARED, "keyboard_irq_handler", (void *)(irq_handler));
+
+    return ret;
 }
 
 /*
@@ -54,6 +59,7 @@ static void __exit irq_ex_exit(void)
 {
     // Free the IRQ and pass the same argument as in request_irq()
     free_irq(KEYBOARD_IRQ, (void *)(irq_handler));
+    pr_info("irq_ex_exit done\n");
 }
 
 module_init(irq_ex_init);
