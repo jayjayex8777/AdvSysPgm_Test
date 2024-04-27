@@ -148,15 +148,15 @@ static int simple_init(void)
                 pr_err("Failed to create pthread\n");
         } 
         else {
-            pr_err("pthread created successfully\n");
+            pr_info("pthread created successfully\n");
         }
         
         cthreads = kthread_run(consumer, NULL, "consumer_thread");
-        if (IS_ERR(pthreads)) {
-            pr_err("Failed to create pthread\n");
+        if (IS_ERR(cthreads)) {
+            pr_err("Failed to create cthread\n");
         } 
         else {
-            pr_err("pthread created successfully\n");
+            pr_info("cthread created successfully\n");
         }
 
         return ret;
@@ -164,6 +164,7 @@ static int simple_init(void)
 
 static void simple_exit(void)
 {
+/*
         if (pthreads){ 
                 kthread_stop(pthreads);
                 pr_info("pthread stopped successfully\n");
@@ -172,6 +173,7 @@ static void simple_exit(void)
                 kthread_stop(cthreads);
                 pr_info("cthread stopped successfully\n");
         }
+*/
         /*
          * free irq, free tasklet
          */
