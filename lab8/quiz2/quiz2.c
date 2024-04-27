@@ -164,11 +164,11 @@ static int simple_init(void)
 static void simple_exit(void)
 {
         if (pthreads){ 
-                kthread_stop(pthreads[i]);
+                kthread_stop(pthreads);
                 pr_info("pthread stopped successfully\n");
         }
         if (cthreads){ 
-                kthread_stop(cthreads[i]);
+                kthread_stop(cthreads);
                 pr_info("cthread stopped successfully\n");
         }
         /*
@@ -180,7 +180,7 @@ static void simple_exit(void)
 
         tasklet_kill(&my_enqueue_tasklet);
         tasklet_kill(&my_dequeue_tasklet);
-        tasklet_kill(&my_exitqueue_tasklet);
+        tasklet_kill(&my_exit_tasklet);
 }
 
 module_init(simple_init);       // 모듈 생성될 때 simpel_init 함수 호출
