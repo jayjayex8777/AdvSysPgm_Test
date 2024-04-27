@@ -25,6 +25,7 @@ extern int sbuf_remove(sbuf_t * sp);
 #define SBUFSIZE 3
 #define NUM_SBUF 1
 #define NUM_THREADS 1
+#define KEYBOARD_IRQ 1
 
 static struct task_struct **pthreads;
 static struct task_struct **cthreads;
