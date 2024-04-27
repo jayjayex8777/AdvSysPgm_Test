@@ -2,6 +2,11 @@
 #include <linux/interrupt.h>
 #include <asm/io.h>
 #include <linux/delay.h>
+#include <linux/init.h>
+#include <linux/module.h>
+#include <linux/kernel.h>
+#include <linux/kthread.h>
+#include <linux/slab.h>
 
 #include "sbuf.h"
 
@@ -92,26 +97,34 @@ irqreturn_t irq_handler(int irq, void *dev_id)
 
 static int producer(void *arg)
 {
+int val;
     while (!exit_flag) {
         if (enqueue_flag) {
-            sbuf_insert(sbufs, (int)arg); // example item insertion
+            sbuf_insert(sbufs, val);
+                pr_info("Producer enqueued item: %d\n",val);
+                val++;
             enqueue_flag = 0;
         }
         msleep(100); // Sleep to simulate work
     }
-    
+
+pr_info("Producer has terminated\n");
     return 0;
 }
 
 static int consumer(void *arg)
 {
+        int item;
     while (!exit_flag) {
         if (dequeue_flag) {
-            int item = sbuf_remove(sbufs); // example item removal
+            item = sbuf_remove(sbufs);
+                pr_info("Consumer dequeued item: %d\n",item);
             dequeue_flag = 0;
         }
         msleep(100); // Sleep to simulate work
     }
+        
+        pr_info("Consumer has terminated\n");
     return 0;
 }
 
