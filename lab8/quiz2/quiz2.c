@@ -3,11 +3,6 @@
 #include <asm/io.h>
 #include <linux/delay.h>
 
-extern void countOne(int);
-extern void countOne(int);
-extern void countOne(int);
-extern void countOne(int);
-
 #include "sbuf.h"
 
 /* create an empty, bounded, shared FIFO buffer with n slots */
@@ -28,16 +23,43 @@ extern int sbuf_remove(sbuf_t * sp);
 
 static struct task_struct **pthreads;
 static struct task_struct **cthreads;
-static int exit_flag = 0, enqueue_flag = 0, dequeue_flag = 0;
+static volatile int exit_flag = 0, enqueue_flag = 0, dequeue_flag = 0;
 sbuf_t *sbufs = NULL;
 
 /*
  * declare three tasklets (Esc, F2, F3)
  */
+static void do_enqueue_tasklet(struct tasklet_struct *unused);
+static DECLARE_TASKLET(my_enqueue_tasklet, do_enqueue_tasklet);
+
+static void do_dequeue_tasklet(struct tasklet_struct *unused);
+static DECLARE_TASKLET(my_dequeue_tasklet, do_dequeue_tasklet);
+
+static void do_exit_tasklet(struct tasklet_struct *unused);
+static DECLARE_TASKLET(my_exit_tasklet, do_exit_tasklet);
 
 /*
  * declare three tasklet functions (Esc, F2, F3)
  */
+static void do_dequeue_tasklet(struct tasklet_struct *unused)
+{
+        pr_info("TASKLET You pressed F2\n");
+        enqueue_flag = true;
+}
+
+static void do_dequeue_tasklet(struct tasklet_struct *unused)
+{
+        pr_info("TASKLET You pressed F3\n");
+        dequeue_flag = true;
+}
+
+static void do_exit_tasklet(struct tasklet_struct *unused)
+{
+        pr_info("TASKLET You pressed ESC\n");
+        exit_flag = true;
+}
+
+
 irqreturn_t irq_handler(int irq, void *dev_id)
 {
         /*
