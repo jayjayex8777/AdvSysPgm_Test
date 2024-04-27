@@ -180,7 +180,9 @@ static void simple_exit(void)
         kfree(pthreads);
         kfree(cthreads);
         kfree(sbufs);
-
+         
+        free_irq(KEYBOARD_IRQ, (void *)(irq_handler));
+        
         tasklet_kill(&my_enqueue_tasklet);
         tasklet_kill(&my_dequeue_tasklet);
         tasklet_kill(&my_exit_tasklet);
