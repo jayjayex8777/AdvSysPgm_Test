@@ -27,8 +27,8 @@ extern int sbuf_remove(sbuf_t * sp);
 #define NUM_THREADS 1
 #define KEYBOARD_IRQ 1
 
-static struct task_struct **pthreads;
-static struct task_struct **cthreads;
+static struct task_struct *pthreads;
+static struct task_struct *cthreads;
 static volatile int exit_flag = 0, enqueue_flag = 0, dequeue_flag = 0;
 sbuf_t *sbufs = NULL;
 
@@ -47,7 +47,7 @@ static DECLARE_TASKLET(my_exit_tasklet, do_exit_tasklet);
 /*
  * declare three tasklet functions (Esc, F2, F3)
  */
-static void do_dequeue_tasklet(struct tasklet_struct *unused)
+static void do_enqueue_tasklet(struct tasklet_struct *unused)
 {
         pr_info("TASKLET You pressed F2\n");
         enqueue_flag = true;
@@ -133,8 +133,8 @@ static int simple_init(void)
 {
         int ret;
         
-        pthreads = (struct task_struct **)kmalloc(sizeof(struct task_struct *) * NUM_THREADS, GFP_KERNEL);
-        cthreads = (struct task_struct **)kmalloc(sizeof(struct tast_struct *) * NUM_THREADS, GFP_KERNEL);
+        pthreads = (struct task_struct *)kmalloc(sizeof(struct task_struct *) * NUM_THREADS, GFP_KERNEL);
+        cthreads = (struct task_struct *)kmalloc(sizeof(struct tast_struct *) * NUM_THREADS, GFP_KERNEL);
         sbufs = (sbuf_t *) kmalloc(sizeof(sbuf_t) * NUM_SBUF, GFP_KERNEL);
 
         sbuf_init(&sbufs[0], SBUFSIZE);
