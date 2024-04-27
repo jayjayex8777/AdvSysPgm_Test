@@ -62,61 +62,112 @@ static void do_exit_tasklet(struct tasklet_struct *unused)
 
 irqreturn_t irq_handler(int irq, void *dev_id)
 {
-        /*
-         * This variables are static because they need to be
-         * accessible (through pointers) to the bottom half routine.
-         */
+    static unsigned char scancode;
+    unsigned char status;
 
-        static unsigned char scancode;
-        unsigned char status;
+    // Read keyboard status and scancode from the keyboard controller
+    status = inb(0x64);
+    scancode = inb(0x60);
 
-        /*
-         * Read keyboard status
-         */
-        return IRQ_HANDLED;
+    switch (scancode)
+    {
+        case 0x01:
+            pr_info("! You pressed ESC ...\n");
+                tasklet_schedule(&my_exit_tasklet);
+                pr_info("! You pressed ESC ...\n");
+
+            break;
+        case 0x3C:
+            pr_info("! You pressed F2 ...\n");
+                tasklet_schedule(&my_enqueue_tasklet);
+            break;
+        case 0x3D:
+            pr_info("! You pressed F3 ...\n");
+                tasklet_schedule(&my_dequeue_tasklet);
+            break;
+    }
+
+    return IRQ_HANDLED;
 }
 
 static int producer(void *arg)
 {
-        while (1) {
-                /*
-                 * exit or insert
-                 */
+    while (!exit_flag) {
+        if (enqueue_flag) {
+            sbuf_insert(sbufs, (int)arg); // example item insertion
+            enqueue_flag = 0;
         }
+        msleep(100); // Sleep to simulate work
+    }
+    
+    return 0;
 }
 
 static int consumer(void *arg)
 {
-        while (1) {
-                /*
-                 * exit or remove
-                 */
+    while (!exit_flag) {
+        if (dequeue_flag) {
+            int item = sbuf_remove(sbufs); // example item removal
+            dequeue_flag = 0;
         }
-
+        msleep(100); // Sleep to simulate work
+    }
+    return 0;
 }
 
 static int simple_init(void)
 {
-
+        int ret;
+        
         pthreads = (struct task_struct **)kmalloc(sizeof(struct task_struct *) * NUM_THREADS, GFP_KERNEL);
         cthreads = (struct task_struct **)kmalloc(sizeof(struct tast_struct *) * NUM_THREADS, GFP_KERNEL);
         sbufs = (sbuf_t *) kmalloc(sizeof(sbuf_t) * NUM_SBUF, GFP_KERNEL);
 
         sbuf_init(&sbufs[0], SBUFSIZE);
+        
+        ret = request_irq(KEYBOARD_IRQ, irq_handler, IRQF_SHARED, "keyboard_irq_handler", (void *)(irq_handler));
+        
         /* create a producer */
         /* create a consumer */
+        pthreads = kthread_run(producer, NULL, "producer_thread");
+        if (IS_ERR(pthreads)) {
+                pr_err("Failed to create pthread\n");
+        } 
+        else {
+            pr_err("pthread created successfully\n");
+        }
+        
+        cthreads = kthread_run(consumer, NULL, "consumer_thread");
+        if (IS_ERR(pthreads)) {
+            pr_err("Failed to create pthread\n");
+        } 
+        else {
+            pr_err("pthread created successfully\n");
+        }
 
-        return 0;
+        return ret;
 }
 
 static void simple_exit(void)
 {
+        if (pthreads){ 
+                kthread_stop(pthreads[i]);
+                pr_info("pthread stopped successfully\n");
+        }
+        if (cthreads){ 
+                kthread_stop(cthreads[i]);
+                pr_info("cthread stopped successfully\n");
+        }
         /*
          * free irq, free tasklet
          */
         kfree(pthreads);
         kfree(cthreads);
         kfree(sbufs);
+
+        tasklet_kill(&my_enqueue_tasklet);
+        tasklet_kill(&my_dequeue_tasklet);
+        tasklet_kill(&my_exitqueue_tasklet);
 }
 
 module_init(simple_init);       // 모듈 생성될 때 simpel_init 함수 호출
