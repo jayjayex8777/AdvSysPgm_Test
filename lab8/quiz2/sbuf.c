@@ -46,11 +46,13 @@ int sbuf_remove(sbuf_t * sp)
 
 static int simple_init(void)    // 모듈이 생성될 때의 함수
 {
+        pr_info("Loading sbuf\n");
         return 0;
 }
 
 static void simple_exit(void)   //모듈이 삭제될 때의 함수
 {
+        pr_info("Removing sbuf\n");
         return;
 }
 
