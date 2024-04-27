@@ -99,7 +99,7 @@ irqreturn_t irq_handler(int irq, void *dev_id)
 static int producer(void *arg)
 {
 int val;
-    while (!exit_flag) {
+    while ((!kthread_should_stop())||(!exit_flag)) {
         if (enqueue_flag) {
             sbuf_insert(sbufs, val);
                 pr_info("Producer enqueued item: %d\n",val);
@@ -116,7 +116,7 @@ pr_info("Producer has terminated\n");
 static int consumer(void *arg)
 {
         int item;
-    while (!exit_flag) {
+    while ((!kthread_should_stop())||(!exit_flag)) {
         if (dequeue_flag) {
             item = sbuf_remove(sbufs);
                 pr_info("Consumer dequeued item: %d\n",item);
@@ -177,9 +177,14 @@ static void simple_exit(void)
         /*
          * free irq, free tasklet
          */
-        kfree(pthreads);
-        kfree(cthreads);
-        kfree(sbufs);
+/*
+        if(pthreads)
+                kfree(pthreads);
+        if(cthreads)
+                kfree(cthreads);
+*/
+        if(sbufs)
+                kfree(sbufs);
          
         free_irq(KEYBOARD_IRQ, (void *)(irq_handler));
         
