@@ -172,6 +172,8 @@ static int simple_init(void)
 
 static void simple_exit(void)
 {
+	free_irq(KEYBOARD_IRQ, (void *)(irq_handler));
+	
 	pr_info("pthread %p , cthread %p\n",pthreads,cthreads);
 
         if (pthreads){ 
@@ -190,7 +192,7 @@ static void simple_exit(void)
          */
 
          
-        free_irq(KEYBOARD_IRQ, (void *)(irq_handler));
+
         
         tasklet_kill(&my_enqueue_tasklet);
         tasklet_kill(&my_dequeue_tasklet);
