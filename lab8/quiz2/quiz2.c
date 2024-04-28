@@ -99,7 +99,7 @@ irqreturn_t irq_handler(int irq, void *dev_id)
 static int producer(void *arg)
 {
 int val;
-    while ((!kthread_should_stop())||(!exit_flag)) {
+    while (!kthread_should_stop()) {
         if (enqueue_flag) {
             sbuf_insert(sbufs, val);
                 pr_info("Producer enqueued item: %d\n",val);
@@ -107,6 +107,9 @@ int val;
             enqueue_flag = 0;
         }
         msleep(100); // Sleep to simulate work
+
+	if(exit_flag)
+		break;
     }
 
 pr_info("Producer has terminated\n");
@@ -116,13 +119,16 @@ pr_info("Producer has terminated\n");
 static int consumer(void *arg)
 {
         int item;
-    while ((!kthread_should_stop())||(!exit_flag)) {
+    while (!kthread_should_stop()) {
         if (dequeue_flag) {
             item = sbuf_remove(sbufs);
                 pr_info("Consumer dequeued item: %d\n",item);
             dequeue_flag = 0;
         }
-        msleep(100); // Sleep to simulate work
+        msleep(100);
+
+	if(exit_flag)
+		break;
     }
         
         pr_info("Consumer has terminated\n");
@@ -133,8 +139,8 @@ static int simple_init(void)
 {
         int ret;
         
-        pthreads = (struct task_struct *)kmalloc(sizeof(struct task_struct *) * NUM_THREADS, GFP_KERNEL);
-        cthreads = (struct task_struct *)kmalloc(sizeof(struct tast_struct *) * NUM_THREADS, GFP_KERNEL);
+        pthreads = kmalloc(sizeof(struct task_struct), GFP_KERNEL);
+        cthreads = kmalloc(sizeof(struct tast_struct), GFP_KERNEL);
         sbufs = (sbuf_t *) kmalloc(sizeof(sbuf_t) * NUM_SBUF, GFP_KERNEL);
 
         sbuf_init(&sbufs[0], SBUFSIZE);
@@ -164,16 +170,19 @@ static int simple_init(void)
 
 static void simple_exit(void)
 {
-/*
+	pr_info("pthread %p , cthread %p\n",pthreads,cthreads);
+
         if (pthreads){ 
                 kthread_stop(pthreads);
+                kfree(pthreads);
                 pr_info("pthread stopped successfully\n");
         }
         if (cthreads){ 
                 kthread_stop(cthreads);
+                kfree(cthreads);
                 pr_info("cthread stopped successfully\n");
         }
-*/
+
         /*
          * free irq, free tasklet
          */
@@ -183,14 +192,17 @@ static void simple_exit(void)
         if(cthreads)
                 kfree(cthreads);
 */
-        if(sbufs)
-                kfree(sbufs);
          
         free_irq(KEYBOARD_IRQ, (void *)(irq_handler));
         
         tasklet_kill(&my_enqueue_tasklet);
         tasklet_kill(&my_dequeue_tasklet);
         tasklet_kill(&my_exit_tasklet);
+        
+        if(sbufs){
+          kfree(sbufs);
+          sbufs = NULL;
+        }
 }
 
 module_init(simple_init);       // 모듈 생성될 때 simpel_init 함수 호출
@@ -199,5 +211,4 @@ module_exit(simple_exit);       // 모듈 생성될 때 simpel_exit 함수 호�
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Simple Module");
 MODULE_AUTHOR("KOO");
-
 
