@@ -8,6 +8,7 @@
 #include <linux/kernel.h>
 #include <linux/kthread.h>
 #include <linux/slab.h>
+#include <linux/sched.h>
 
 #include "sbuf.h"
 
@@ -28,8 +29,8 @@ extern int sbuf_remove(sbuf_t * sp);
 #define NUM_THREADS 1
 #define KEYBOARD_IRQ 1
 
-static struct task_struct *pthreads;
-static struct task_struct *cthreads;
+static struct task_struct *pthreads = NULL;
+static struct task_struct *cthreads = NULL;
 static volatile int exit_flag = 0, enqueue_flag = 0, dequeue_flag = 0;
 sbuf_t *sbufs = NULL;
 
@@ -40,19 +41,19 @@ static struct work_struct my_exit_work;
 
 static void do_enqueue_work(struct work_struct *work)
 {
-    pr_info("WORK You pressed F2\n");
+    pr_info("WORKQUEUE You pressed F2\n");
     enqueue_flag = 1;
 }
 
 static void do_dequeue_work(struct work_struct *work)
 {
-    pr_info("WORK You pressed F3\n");
+    pr_info("WORKQUEUE You pressed F3\n");
     dequeue_flag = 1;
 }
 
 static void do_exit_work(struct work_struct *work)
 {
-    pr_info("WORK You pressed ESC\n");
+    pr_info("WORKQUEUE You pressed ESC\n");
     exit_flag = 1;
 }
 
@@ -91,7 +92,7 @@ static int producer(void *arg)
     int val;
     
     while (!kthread_should_stop()) {
-        
+	
         if (enqueue_flag) {
             sbuf_insert(sbufs, val);
             
@@ -197,6 +198,7 @@ static void simple_exit(void)
     free_irq(KEYBOARD_IRQ, (void *)(irq_handler));
     pr_info("KBD IRQ Freed\n");
 
+    flush_workqueue(my_workqueue);
     destroy_workqueue(my_workqueue);
     pr_info("my workqueue destroyed\n");
         
@@ -211,8 +213,6 @@ module_init(simple_init);
 module_exit(simple_exit);
 
 MODULE_LICENSE("GPL");
-
-
 MODULE_DESCRIPTION("Simple Module");
 MODULE_AUTHOR("Intae Jun");
 
