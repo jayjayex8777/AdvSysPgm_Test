@@ -139,8 +139,8 @@ static int simple_init(void)
 {
         int ret;
         
-        pthreads = kmalloc(sizeof(struct task_struct), GFP_KERNEL);
-        cthreads = kmalloc(sizeof(struct tast_struct), GFP_KERNEL);
+        pthreads = kmalloc(sizeof(struct task_struct *), GFP_KERNEL);
+        cthreads = kmalloc(sizeof(struct tast_struct *), GFP_KERNEL);
         sbufs = (sbuf_t *) kmalloc(sizeof(sbuf_t) * NUM_SBUF, GFP_KERNEL);
 
         sbuf_init(&sbufs[0], SBUFSIZE);
