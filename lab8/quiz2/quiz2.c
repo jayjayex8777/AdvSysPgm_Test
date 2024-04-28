@@ -100,7 +100,7 @@ static int producer(void *arg)
 {
 int val;
     while (!kthread_should_stop()) {
-	//    while (!exit_flag) {
+	    //while (!exit_flag) {
         if (enqueue_flag) {
             sbuf_insert(sbufs, val);
                 pr_info("Producer enqueued item: %d\n",val);
@@ -109,8 +109,8 @@ int val;
         }
         msleep(100); // Sleep to simulate work
 
-	//if(exit_flag)
-	//	break;
+	if(exit_flag)
+	  break;
     }
 
 pr_info("Producer has terminated\n");
@@ -120,8 +120,8 @@ pr_info("Producer has terminated\n");
 static int consumer(void *arg)
 {
         int item;
-    while (!kthread_should_stop()) {
-	//while (!exit_flag) {
+      while (!kthread_should_stop()) {
+  //while (!exit_flag) {
         if (dequeue_flag) {
             item = sbuf_remove(sbufs);
                 pr_info("Consumer dequeued item: %d\n",item);
@@ -129,8 +129,8 @@ static int consumer(void *arg)
         }
         msleep(100);
 
-	//if(exit_flag)
-	//	break;
+        if(exit_flag)
+          break;
     }
         
         pr_info("Consumer has terminated\n");
@@ -176,15 +176,21 @@ static void simple_exit(void)
 	
 	pr_info("pthread %p , cthread %p\n",pthreads,cthreads);
 
-        if (pthreads){ 
+        if (pthreads){
+          if(!exit_flag){
                 kthread_stop(pthreads);
-                //kfree(pthreads);
                 pr_info("pthread stopped successfully\n");
+                }
+          else 
+              pr_info("pthread already stopped\n");
         }
         if (cthreads){ 
-                kthread_stop(cthreads);
-                //kfree(cthreads);
+            if(!exit_flag){
+                kthread_stop(cthreads);  
                 pr_info("cthread stopped successfully\n");
+            }
+            else 
+              pr_info("cthread already stopped\n");
         }
 
         /*
@@ -211,4 +217,3 @@ module_exit(simple_exit);       // 모듈 생성될 때 simpel_exit 함수 호�
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Simple Module");
 MODULE_AUTHOR("KOO");
-
