@@ -33,37 +33,27 @@ static struct task_struct *cthreads;
 static volatile int exit_flag = 0, enqueue_flag = 0, dequeue_flag = 0;
 sbuf_t *sbufs = NULL;
 
-/*
- * declare three tasklets (Esc, F2, F3)
- */
-static void do_enqueue_tasklet(struct tasklet_struct *unused);
-static DECLARE_TASKLET(my_enqueue_tasklet, do_enqueue_tasklet);
+static struct workqueue_struct *my_workqueue;
+static struct work_struct my_enqueue_work;
+static struct work_struct my_dequeue_work;
+static struct work_struct my_exit_work;
 
-static void do_dequeue_tasklet(struct tasklet_struct *unused);
-static DECLARE_TASKLET(my_dequeue_tasklet, do_dequeue_tasklet);
-
-static void do_exit_tasklet(struct tasklet_struct *unused);
-static DECLARE_TASKLET(my_exit_tasklet, do_exit_tasklet);
-
-/*
- * declare three tasklet functions (Esc, F2, F3)
- */
-static void do_enqueue_tasklet(struct tasklet_struct *unused)
+static void do_enqueue_work(struct work_struct *work)
 {
-    pr_info("TASKLET You pressed F2\n");
-    enqueue_flag = true;
+    pr_info("WORK You pressed F2\n");
+    enqueue_flag = 1;
 }
 
-static void do_dequeue_tasklet(struct tasklet_struct *unused)
+static void do_dequeue_work(struct work_struct *work)
 {
-    pr_info("TASKLET You pressed F3\n");
-    dequeue_flag = true;
+    pr_info("WORK You pressed F3\n");
+    dequeue_flag = 1;
 }
 
-static void do_exit_tasklet(struct tasklet_struct *unused)
+static void do_exit_work(struct work_struct *work)
 {
-    pr_info("TASKLET You pressed ESC\n");
-    exit_flag = true;
+    pr_info("WORK You pressed ESC\n");
+    exit_flag = 1;
 }
 
 
@@ -79,17 +69,17 @@ irqreturn_t irq_handler(int irq, void *dev_id)
     {
         case 0x01:
             pr_info("! You pressed ESC ...\n");
-            tasklet_schedule(&my_exit_tasklet);
+	queue_work(my_workqueue, &my_exit_work);
             break;
 
         case 0x3C:
             pr_info("! You pressed F2 ...\n");
-            tasklet_schedule(&my_enqueue_tasklet);
+            queue_work(my_workqueue, &my_enqueue_work);
             break;
 
         case 0x3D:
             pr_info("! You pressed F3 ...\n");
-            tasklet_schedule(&my_dequeue_tasklet);
+            queue_work(my_workqueue, &my_dequeue_work);
             break;
     }
 
@@ -152,6 +142,11 @@ static int simple_init(void)
 
     sbufs = (sbuf_t *) kmalloc(sizeof(sbuf_t) * NUM_SBUF, GFP_KERNEL);
     sbuf_init(&sbufs[0], SBUFSIZE);
+    
+    my_workqueue = create_workqueue("my_workqueue");
+    INIT_WORK(&my_enqueue_work, do_enqueue_work);
+    INIT_WORK(&my_dequeue_work, do_dequeue_work);
+    INIT_WORK(&my_exit_work, do_exit_work);
         
     ret = request_irq(KEYBOARD_IRQ, irq_handler, IRQF_SHARED, "keyboard_irq_handler", (void *)(irq_handler));
         
@@ -202,14 +197,8 @@ static void simple_exit(void)
     free_irq(KEYBOARD_IRQ, (void *)(irq_handler));
     pr_info("KBD IRQ Freed\n");
 
-    tasklet_kill(&my_enqueue_tasklet);
-	pr_info("my_enqueue_tasklet killed\n");
-    
-    tasklet_kill(&my_dequeue_tasklet);
-	pr_info("my_dequeue_tasklet killed\n");
-    
-    tasklet_kill(&my_exit_tasklet);
-	pr_info("my_exit_tasklet killed\n");
+    destroy_workqueue(my_workqueue);
+    pr_info("my workqueue destroyed\n");
         
     if(sbufs){
         kfree(sbufs);
@@ -222,6 +211,8 @@ module_init(simple_init);
 module_exit(simple_exit);
 
 MODULE_LICENSE("GPL");
+
+
 MODULE_DESCRIPTION("Simple Module");
 MODULE_AUTHOR("Intae Jun");
 
