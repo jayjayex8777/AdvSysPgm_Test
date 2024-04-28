@@ -99,8 +99,8 @@ irqreturn_t irq_handler(int irq, void *dev_id)
 static int producer(void *arg)
 {
 int val;
-    //while (!kthread_should_stop()) {
-	    while (!exit_flag) {
+    while (!kthread_should_stop()) {
+	//    while (!exit_flag) {
         if (enqueue_flag) {
             sbuf_insert(sbufs, val);
                 pr_info("Producer enqueued item: %d\n",val);
@@ -120,8 +120,8 @@ pr_info("Producer has terminated\n");
 static int consumer(void *arg)
 {
         int item;
-    //while (!kthread_should_stop()) {
-	while (!exit_flag) {
+    while (!kthread_should_stop()) {
+	//while (!exit_flag) {
         if (dequeue_flag) {
             item = sbuf_remove(sbufs);
                 pr_info("Consumer dequeued item: %d\n",item);
@@ -141,8 +141,8 @@ static int simple_init(void)
 {
         int ret;
         
-        pthreads = kmalloc(sizeof(struct task_struct *), GFP_KERNEL);
-        cthreads = kmalloc(sizeof(struct tast_struct *), GFP_KERNEL);
+        //pthreads = kmalloc(sizeof(struct task_struct *), GFP_KERNEL);
+        //cthreads = kmalloc(sizeof(struct tast_struct *), GFP_KERNEL);
         sbufs = (sbuf_t *) kmalloc(sizeof(sbuf_t) * NUM_SBUF, GFP_KERNEL);
 
         sbuf_init(&sbufs[0], SBUFSIZE);
@@ -177,13 +177,13 @@ static void simple_exit(void)
 	pr_info("pthread %p , cthread %p\n",pthreads,cthreads);
 
         if (pthreads){ 
-//                kthread_stop(pthreads);
-                kfree(pthreads);
+                kthread_stop(pthreads);
+                //kfree(pthreads);
                 pr_info("pthread stopped successfully\n");
         }
         if (cthreads){ 
-  //              kthread_stop(cthreads);
-                kfree(cthreads);
+                kthread_stop(cthreads);
+                //kfree(cthreads);
                 pr_info("cthread stopped successfully\n");
         }
 
