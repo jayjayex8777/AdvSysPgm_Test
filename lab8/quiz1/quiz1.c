@@ -19,11 +19,11 @@ irqreturn_t irq_handler(int irq, void *dev_id)
         case 0x01:
             printk(KERN_INFO "ESC key pressed\n");
             break;
-        case 0x3B:
-            printk(KERN_INFO "F1 key pressed\n");
-            break;
         case 0x3C:
             printk(KERN_INFO "F2 key pressed\n");
+            break;
+        case 0x3D:
+            printk(KERN_INFO "F3 key pressed\n");
             break;
     }
 
