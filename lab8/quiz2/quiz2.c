@@ -195,11 +195,16 @@ static void simple_exit(void)
 
         
         tasklet_kill(&my_enqueue_tasklet);
+	pr_info("my_enqueue_tasklet killed\n");
         tasklet_kill(&my_dequeue_tasklet);
+	pr_info("my_dequeue_tasklet killed\n");
         tasklet_kill(&my_exit_tasklet);
+	pr_info("my_exit_tasklet killed\n");
         
         if(sbufs){
+	  pr_info("trying to free sbuf...\n");
           kfree(sbufs);
+	  pr_info("sbuf freed\n");
           sbufs = NULL;
         }
 }
