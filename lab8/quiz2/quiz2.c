@@ -189,11 +189,7 @@ static void simple_exit(void)
 
         /*
          * free irq, free tasklet
-         */
-
-         
-
-        
+         */        
         tasklet_kill(&my_enqueue_tasklet);
 	pr_info("my_enqueue_tasklet killed\n");
         tasklet_kill(&my_dequeue_tasklet);
