@@ -177,8 +177,6 @@ static int simple_init(void)
 
 static void simple_exit(void)
 {
-    pr_info("pthread %p , cthread %p\n",pthreads,cthreads);
-
     if (pthreads){
         if(!exit_flag){
             kthread_stop(pthreads);
