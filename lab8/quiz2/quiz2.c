@@ -99,7 +99,8 @@ irqreturn_t irq_handler(int irq, void *dev_id)
 static int producer(void *arg)
 {
 int val;
-    while (!kthread_should_stop()) {
+    //while (!kthread_should_stop()) {
+	    while (!exit_flag) {
         if (enqueue_flag) {
             sbuf_insert(sbufs, val);
                 pr_info("Producer enqueued item: %d\n",val);
@@ -108,8 +109,8 @@ int val;
         }
         msleep(100); // Sleep to simulate work
 
-	if(exit_flag)
-		break;
+	//if(exit_flag)
+	//	break;
     }
 
 pr_info("Producer has terminated\n");
@@ -119,7 +120,8 @@ pr_info("Producer has terminated\n");
 static int consumer(void *arg)
 {
         int item;
-    while (!kthread_should_stop()) {
+    //while (!kthread_should_stop()) {
+	while (!exit_flag) {
         if (dequeue_flag) {
             item = sbuf_remove(sbufs);
                 pr_info("Consumer dequeued item: %d\n",item);
@@ -127,8 +129,8 @@ static int consumer(void *arg)
         }
         msleep(100);
 
-	if(exit_flag)
-		break;
+	//if(exit_flag)
+	//	break;
     }
         
         pr_info("Consumer has terminated\n");
@@ -173,12 +175,12 @@ static void simple_exit(void)
 	pr_info("pthread %p , cthread %p\n",pthreads,cthreads);
 
         if (pthreads){ 
-                kthread_stop(pthreads);
+//                kthread_stop(pthreads);
                 kfree(pthreads);
                 pr_info("pthread stopped successfully\n");
         }
         if (cthreads){ 
-                kthread_stop(cthreads);
+  //              kthread_stop(cthreads);
                 kfree(cthreads);
                 pr_info("cthread stopped successfully\n");
         }
@@ -186,12 +188,7 @@ static void simple_exit(void)
         /*
          * free irq, free tasklet
          */
-/*
-        if(pthreads)
-                kfree(pthreads);
-        if(cthreads)
-                kfree(cthreads);
-*/
+
          
         free_irq(KEYBOARD_IRQ, (void *)(irq_handler));
         
