@@ -17,13 +17,13 @@ irqreturn_t irq_handler(int irq, void *dev_id)
     switch (scancode)
     {
         case 0x01:
-            printk(KERN_INFO "ESC key pressed\n");
+            printk(KERN_INFO "! You pressed ESC ...\n");
             break;
         case 0x3C:
-            printk(KERN_INFO "F2 key pressed\n");
+            printk(KERN_INFO "! You pressed F2 ...\n");
             break;
         case 0x3D:
-            printk(KERN_INFO "F3 key pressed\n");
+            printk(KERN_INFO "! You pressed F3 ...\n");
             break;
     }
 
