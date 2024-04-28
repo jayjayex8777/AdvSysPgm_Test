@@ -4,10 +4,6 @@
 #include <linux/interrupt.h>
 #include <asm/io.h>
 
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("22SYS");
-MODULE_DESCRIPTION("Keyboard interrupt handler module");
-
 #define KEYBOARD_IRQ 1
 
 /*
@@ -64,3 +60,7 @@ static void __exit irq_ex_exit(void)
 
 module_init(irq_ex_init);
 module_exit(irq_ex_exit);
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("22SYS");
+MODULE_DESCRIPTION("Keyboard interrupt handler module");
