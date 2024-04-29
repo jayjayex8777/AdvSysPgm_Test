@@ -113,7 +113,7 @@ static int producer(void *arg)
             enqueue_flag = 0;
         }
         
-        msleep(100);
+        //msleep(100);
 
         if(exit_flag)
             break;
@@ -142,7 +142,7 @@ static int consumer(void *arg)
             dequeue_flag = 0;
         }
 
-        msleep(100);
+        //msleep(100);
 
         if(exit_flag)
             break;
