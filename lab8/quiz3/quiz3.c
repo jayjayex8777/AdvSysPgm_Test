@@ -96,7 +96,7 @@ static int producer(void *arg)
     int val;
     
     while (!kthread_should_stop()) {
-	set_current_state(TASK_INTERRUPTABLE);
+	set_current_state(TASK_INTERRUPTIBLE);
 	if (!enqueue_flag && !exit_flag) {
 		schedule();  // Sleeps until woken up
         }
