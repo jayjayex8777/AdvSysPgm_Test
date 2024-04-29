@@ -129,7 +129,7 @@ static int consumer(void *arg)
     int item;
     
     while (!kthread_should_stop()) {
-	set_current_state(TASK_INTERRUPTABLE);
+	set_current_state(TASK_INTERRUPTIBLE);
 	if (!dequeue_flag && !exit_flag) {
 		schedule();  // Sleeps until woken up
         }
