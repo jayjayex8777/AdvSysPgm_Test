@@ -68,19 +68,23 @@ irqreturn_t irq_handler(int irq, void *dev_id)
 
     switch (scancode)
     {
-        case 0x01:
-            pr_info("! You pressed ESC ...\n");
-	queue_work(my_workqueue, &my_exit_work);
-            break;
+	case 0x01:
+		pr_info("! You pressed ESC ...\n");
+		queue_work(my_workqueue, &my_exit_work);
+		wake_up_process(pthreads);
+		wake_up_process(cthreads);
+		break;
 
         case 0x3C:
             pr_info("! You pressed F2 ...\n");
             queue_work(my_workqueue, &my_enqueue_work);
+		wake_up_process(pthreads);
             break;
 
         case 0x3D:
             pr_info("! You pressed F3 ...\n");
             queue_work(my_workqueue, &my_dequeue_work);
+		wake_up_process(cthreads);
             break;
     }
 
@@ -92,7 +96,13 @@ static int producer(void *arg)
     int val;
     
     while (!kthread_should_stop()) {
+	set_current_state(TASK_INTERRUPTABLE);
+	if (!enqueue_flag && !exit_flag) {
+		schedule();  // Sleeps until woken up
+        }
 	
+	__set_current_state(TASK_RUNNING);
+
         if (enqueue_flag) {
             sbuf_insert(sbufs, val);
             
@@ -119,7 +129,13 @@ static int consumer(void *arg)
     int item;
     
     while (!kthread_should_stop()) {
-    
+	set_current_state(TASK_INTERRUPTABLE);
+	if (!dequeue_flag && !exit_flag) {
+		schedule();  // Sleeps until woken up
+        }
+	
+	__set_current_state(TASK_RUNNING);
+	    
         if (dequeue_flag) {
             item = sbuf_remove(sbufs);
             pr_info("Consumer dequeued item: %d\n",item);
