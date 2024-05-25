@@ -73,8 +73,11 @@ static int __init number_init(void)
     pr_info("number: queued 4 works on cpu%d-%d\n", cpu, cpu + 3);
 
     pr_info("number: flushing workers\n");
-    // Flush queued workers
-    flush_workqueue(system_wq);
+    // Flush individual workers
+    flush_work(&work1);
+    flush_work(&work2);
+    flush_work(&work3);
+    flush_work(&work4);
     pr_info("number: flushed workers\n");
 
     time_end = get_current_time_in_ms();
@@ -97,3 +100,4 @@ module_exit(number_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("22SYS");
+
