@@ -3,6 +3,7 @@
 #include <linux/moduleparam.h>
 #include <linux/workqueue.h>
 #include <linux/ktime.h>
+#include <linux/mutex.h>
 #include <linux/delay.h>
 
 /*
@@ -17,6 +18,9 @@ module_param(mode, int, 0644);
 // Declare workers statically
 static struct work_struct work1, work2, work3, work4;
 
+// Declare a mutex
+static struct mutex my_mutex;
+
 static volatile int main_number = 0;
 
 static inline s64 get_current_time_in_ms(void)
@@ -28,8 +32,27 @@ static void number_worker(struct work_struct *unused)
 {
     volatile int i;
 
-    for (i = 0; i < 10000000; i++) {
-        main_number++;
+    switch (mode) {
+    case 1: // fine-grained mutex
+        for (i = 0; i < 10000000; i++) {
+            mutex_lock(&my_mutex);
+            main_number++;
+            mutex_unlock(&my_mutex);
+        }
+        break;
+    case 2: // coarse-grained mutex
+        mutex_lock(&my_mutex);
+        for (i = 0; i < 10000000; i++) {
+            main_number++;
+        }
+        mutex_unlock(&my_mutex);
+        break;
+    case 0: // unsafe
+    default:
+        for (i = 0; i < 10000000; i++) {
+            main_number++;
+        }
+        break;
     }
 }
 
@@ -46,12 +69,15 @@ static int __init number_init(void)
         break;
     case 1:
         pr_info("number: using fine-grained mutex\n");
+        mutex_init(&my_mutex);
         break;
     case 2:
         pr_info("number: using coarse-grained mutex\n");
+        mutex_init(&my_mutex);
         break;
     case 3:
         pr_info("number: using atomic operations\n");
+        // Implement atomic operations if needed
         break;
     default:
         pr_info("number: unsupported mode, defaulting to unprotected mode\n");
@@ -100,4 +126,3 @@ module_exit(number_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("22SYS");
-
