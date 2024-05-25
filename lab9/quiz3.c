@@ -119,7 +119,7 @@ static int __init number_init(void)
 
     // Print final number
     if (mode == 3) {
-        pr_info("number: main_number = %d\n", atomic_read(&main_number_atomic));
+        pr_info("number: atomic_number = %d\n", atomic_read(&main_number_atomic));
     } else {
         pr_info("number: main_number = %d\n", main_number);
     }
