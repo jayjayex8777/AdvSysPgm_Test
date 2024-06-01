@@ -190,7 +190,7 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 					}
 
 					/* Identify data segment */
-					if ((vma->vm_flags & VM_WRITE) && (vma->vm_flags & VM_READ) && !(vma->vm_flags & VM_EXEC)) {
+					if (vma->vm_start <= mm->start_data && vma->vm_end >= mm->end_data) {
 						data_size += (vma->vm_end - vma->vm_start);
 						if (!data_start) data_start = vma->vm_start;
 						data_end = vma->vm_end;
