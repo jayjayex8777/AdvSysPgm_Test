@@ -154,12 +154,16 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 			struct vma_iterator vmi;
 			struct vm_area_struct *vma;
 			unsigned long total_vm_size = 0;
+			unsigned long code_size = 0, data_size = 0, heap_size = 0, stack_size = 0;
+			unsigned long code_start = 0, code_end = 0;
+			unsigned long data_start = 0, data_end = 0;
+			unsigned long heap_start = 0, heap_end = 0;
+			unsigned long stack_start = 0, stack_end = 0;
 
 			if (mm) {
 				pr_info("Current memory mappings:\n");
 				vma_iter_init(&vmi, mm, 0);
 				for_each_vma(vmi, vma) {
-
 					char name_buf[256] = "[ anon ]";
 
 					if (vma->vm_file) {
@@ -171,29 +175,47 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 					} 
 					else {
 						pr_info("0x%lx %luK %c%c%c %s\n",
-							vma->vm_start, (vma->vm_end - vma->vm_start) / 1024,
-							(vma->vm_flags & VM_READ) ? 'r' : '-',	(vma->vm_flags & VM_WRITE) ? 'w' : '-',
-							(vma->vm_flags & VM_EXEC) ? 'x' : '-',	name_buf);
+						vma->vm_start, (vma->vm_end - vma->vm_start) / 1024,
+						(vma->vm_flags & VM_READ) ? 'r' : '-',	(vma->vm_flags & VM_WRITE) ? 'w' : '-',
+						(vma->vm_flags & VM_EXEC) ? 'x' : '-',	name_buf);
 					}
+
 					total_vm_size += (vma->vm_end - vma->vm_start);
+
+					/* Identify code segment */
+					if ((vma->vm_flags & VM_EXEC) && (vma->vm_flags & VM_READ)) {
+						code_size += (vma->vm_end - vma->vm_start);
+						if (!code_start) code_start = vma->vm_start;
+						code_end = vma->vm_end;
+					}
+
+					/* Identify data segment */
+					if ((vma->vm_flags & VM_WRITE) && (vma->vm_flags & VM_READ) && !(vma->vm_flags & VM_EXEC)) {
+						data_size += (vma->vm_end - vma->vm_start);
+						if (!data_start) data_start = vma->vm_start;
+						data_end = vma->vm_end;
+					}
+
+					/* Identify heap segment */
+					if (vma->vm_start <= mm->brk && vma->vm_end >= mm->start_brk) {
+						heap_size += (vma->vm_end - vma->vm_start);
+						if (!heap_start) heap_start = vma->vm_start;
+						heap_end = vma->vm_end;
+					}
+
+					/* Identify stack segment */
+					if (vma->vm_start <= mm->start_stack && vma->vm_end >= mm->start_stack) {
+						stack_size += (vma->vm_end - vma->vm_start);
+						if (!stack_start) stack_start = vma->vm_start;
+						stack_end = vma->vm_end;
+					}
 				}
-				pr_info("Total VMA address space: %luK\n", total_vm_size / 1024);		
-				// Print ranges and sizes of code, data, heap, and stack
-				pr_info("Process code addr: 0x%lx ~ 0x%lx (Size: %luK)\n", 
-						mm->start_code, mm->end_code, 
-						(mm->end_code - mm->start_code) / 1024);
 
-				pr_info("Process data addr: 0x%lx ~ 0x%lx (Size: %luK)\n", 
-						mm->start_data, mm->end_data, 
-						(mm->end_data - mm->start_data) / 1024);
-
-				pr_info("Process heap addr: 0x%lx ~ 0x%lx (Size: %luK)\n", 
-						mm->start_brk, mm->brk, 
-						(mm->brk - mm->start_brk) / 1024 );
-
-				pr_info("Process stack addr: 0x%lx (Top of stack)\n", mm->start_stack);
-
-				
+				pr_info("Total VMA address space: %luK\n", total_vm_size / 1024);
+				pr_info("Code segment: 0x%lx - 0x%lx (%luK)\n", code_start, code_end, code_size / 1024);
+				pr_info("Data segment: 0x%lx - 0x%lx (%luK)\n", data_start, data_end, data_size / 1024);
+				pr_info("Heap segment: 0x%lx - 0x%lx (%luK)\n", heap_start, heap_end, heap_size / 1024);
+				pr_info("Stack segment: 0x%lx - 0x%lx (%luK)\n", stack_start, stack_end, stack_size / 1024);
 			}
 			else {
 				pr_info("No memory management structure available\n");
@@ -201,6 +223,7 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 
 			break;
 		}
+
 		
 	}
 	pr_info("\n\n");
