@@ -106,6 +106,10 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 			}
 			break;
 		}
+		case IOCTL_CURMAP:
+		//fill the body
+		 break;
+		
 	}
 	pr_info("\n\n");
 
