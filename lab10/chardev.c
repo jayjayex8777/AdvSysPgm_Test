@@ -190,11 +190,11 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 					}
 
 					/* Identify data segment */
-					if (vma->vm_start <= mm->start_data && vma->vm_end >= mm->end_data) {
-						data_size += (vma->vm_end - vma->vm_start);
-						if (!data_start) data_start = vma->vm_start;
-						data_end = vma->vm_end;
-					}
+					 if (vma->vm_start <= mm->end_data && vma->vm_end >= mm->start_data) {
+                                                data_size += (vma->vm_end - vma->vm_start);
+                                                if (!data_start) data_start = vma->vm_start;
+                                                data_end = vma->vm_end;
+                                        }
 
 					/* Identify heap segment */
 					if (vma->vm_start <= mm->brk && vma->vm_end >= mm->start_brk) {
@@ -212,10 +212,11 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 				}
 
 				pr_info("Total VMA address space: %luK\n", total_vm_size / 1024);
-				pr_info("Code segment: 0x%lx - 0x%lx (%luK)\n", code_start, code_end, code_size / 1024);
-				pr_info("Data segment: 0x%lx - 0x%lx (%luK)\n", data_start, data_end, data_size / 1024);
-				pr_info("Heap segment: 0x%lx - 0x%lx (%luK)\n", heap_start, heap_end, heap_size / 1024);
-				pr_info("Stack segment: 0x%lx - 0x%lx (%luK)\n", stack_start, stack_end, stack_size / 1024);
+				
+				pr_info("Code  : 0x%lx ~ 0x%lx (%luK)\n", code_start, code_end, code_size / 1024);
+				pr_info("Data  : 0x%lx ~ 0x%lx (%luK)\n", data_start, data_end, data_size / 1024);
+				pr_info("Heap  : 0x%lx ~ 0x%lx (%luK)\n", heap_start, heap_end, heap_size / 1024);
+				pr_info("Stack : 0x%lx ~ 0x%lx (%luK)\n", stack_start, stack_end, stack_size / 1024);
 			}
 			else {
 				pr_info("No memory management structure available\n");
