@@ -17,7 +17,7 @@
 
 /*
  * Is the device open right now? Used to prevent
- * concurrent access into the same device
+ * concurent access into the same device
  */
 static int opened = 0;
 
@@ -151,27 +151,12 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 		{
 			struct task_struct *task = current;
 			struct mm_struct *mm = task->mm;
+			struct vma_iterator vmi;
+			struct vm_area_struct *vma;
+			unsigned long total_vm_size = 0;
 
 			if (mm) {
-				// Print ranges and sizes of code, data, heap, and stack
-				pr_info("Process code addr: 0x%lx ~ 0x%lx (Size: %luK)\n", 
-						mm->start_code, mm->end_code, 
-						(mm->end_code - mm->start_code) / 1024);
-
-				pr_info("Process data addr: 0x%lx ~ 0x%lx (Size: %luK)\n", 
-						mm->start_data, mm->end_data, 
-						(mm->end_data - mm->start_data) / 1024);
-
-				pr_info("Process heap addr: 0x%lx ~ 0x%lx (Size: %luK)\n", 
-						mm->start_brk, mm->brk, 
-						(mm->brk - mm->start_brk) / 1024 );
-
-				pr_info("Process stack addr: 0x%lx (Top of stack)\n", mm->start_stack);
-
 				pr_info("Current memory mappings:\n");
-				struct vma_iterator vmi;
-				struct vm_area_struct *vma;
-				unsigned long total_vm_size = 0;
 				vma_iter_init(&vmi, mm, 0);
 				for_each_vma(vmi, vma) {
 
@@ -242,7 +227,7 @@ int chardev_init_module(void)
         struct device *chardev_reg_device;
         int ret;
 
-        chardev_class = class_create(THIS_MODULE, DEVICE_NAME);
+        chardev_class = class_create(DEVICE_NAME);
         if (IS_ERR(chardev_class)) {
                 ret = PTR_ERR(chardev_class);
                 pr_warn("Failed to register class chardev\n");
@@ -287,4 +272,3 @@ module_init(chardev_init_module);
 module_exit(chardev_cleanup_module);
 
 MODULE_LICENSE("GPL");
-
