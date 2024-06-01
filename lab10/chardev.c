@@ -91,7 +91,7 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 			unsigned long heap_start = 0, heap_end = 0;
 			unsigned long stack_start = 0, stack_end = 0;
 
-			down_read(&mm->mmap_sem);
+			down_read(&mm->mmap_lock);
 
 			for (vma = mm->mmap; vma; vma = vma->vm_next) {
 				if (vma->vm_start <= mm->start_code && mm->end_code <= vma->vm_end) {
@@ -115,7 +115,7 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 				}
 			}
 
-			up_read(&mm->mmap_sem);
+			up_read(&mm->mmap_lock);
 
 			pr_info("Process ID: %d, Process Name: %s\n", task->pid, task->comm);
 			pr_info("Code Area: Start = 0x%lx, End = 0x%lx, Size = %lu KB\n", code_start, code_end, (code_end - code_start) / 1024);
