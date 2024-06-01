@@ -78,7 +78,9 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 
         switch (ioctl_num) {
         /* fill the body with cases */
-                pr_info("jit ioctl test \n");
+                case IOCTL_PROCINFO:
+                        pr_info("jit ioctl test \n");
+                break;
         }
 
         pr_info("\n\n");
