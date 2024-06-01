@@ -107,7 +107,7 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 			break;
 		}
 		case IOCTL_CURMAP:
-		{
+				{
 			struct task_struct *task = current;
 			struct mm_struct *mm = task->mm;
 			struct vma_iterator vmi;
@@ -117,13 +117,27 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 				pr_info("Current memory mappings:\n");
 				vma_iter_init(&vmi, mm, 0);
 				for_each_vma(vmi, vma) {
-					pr_info("Start: 0x%lx, End: 0x%lx, Size: %lu KB, Permissions: %c%c%c\n",
-						vma->vm_start, 
-						vma->vm_end,
-						(vma->vm_end - vma->vm_start) / 1024,
-						(vma->vm_flags & VM_READ) ? 'r' : '-',
-						(vma->vm_flags & VM_WRITE) ? 'w' : '-',
-						(vma->vm_flags & VM_EXEC) ? 'x' : '-');
+					char name_buf[256] = "Anonymous";
+					if (vma->vm_file) {
+						char *path = d_path(&vma->vm_file->f_path, name_buf, sizeof(name_buf));
+						pr_info("Start: 0x%lx, End: 0x%lx, Size: %lu KB, Permissions: %c%c%c, Name: %s\n",
+							vma->vm_start, 
+							vma->vm_end,
+							(vma->vm_end - vma->vm_start) / 1024,
+							(vma->vm_flags & VM_READ) ? 'r' : '-',
+							(vma->vm_flags & VM_WRITE) ? 'w' : '-',
+							(vma->vm_flags & VM_EXEC) ? 'x' : '-',
+							IS_ERR(path) ? "Unknown" : path);
+					} else {
+						pr_info("Start: 0x%lx, End: 0x%lx, Size: %lu KB, Permissions: %c%c%c, Name: %s\n",
+							vma->vm_start, 
+							vma->vm_end,
+							(vma->vm_end - vma->vm_start) / 1024,
+							(vma->vm_flags & VM_READ) ? 'r' : '-',
+							(vma->vm_flags & VM_WRITE) ? 'w' : '-',
+							(vma->vm_flags & VM_EXEC) ? 'x' : '-',
+							name_buf);
+					}
 				}
 			} else {
 				pr_info("No memory management structure available\n");
