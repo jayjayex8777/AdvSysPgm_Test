@@ -112,6 +112,7 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 			struct mm_struct *mm = task->mm;
 			struct vma_iterator vmi;
 			struct vm_area_struct *vma;
+			unsigned long total_vm_size = 0;
 
 			if (mm) {
 				pr_info("Current memory mappings:\n");
@@ -133,7 +134,10 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 							(vma->vm_flags & VM_READ) ? 'r' : '-',	(vma->vm_flags & VM_WRITE) ? 'w' : '-',
 							(vma->vm_flags & VM_EXEC) ? 'x' : '-',	name_buf);
 					}
+					total_vm_size += (vma->vm_end - vma->vm_start);
 				}
+				pr_info("Total VM Size: %luK\n", total_vm_size / 1024);
+
 				
 			}
 			else {
