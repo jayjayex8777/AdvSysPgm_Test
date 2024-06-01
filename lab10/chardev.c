@@ -82,8 +82,7 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 		{
 			struct task_struct *task = current;
 			struct mm_struct *mm = task->mm;
-
-			pr_info("Process calling ioctl:\n");
+			
 			pr_info("Process ID: %d\n", task->pid);
 			pr_info("Process name: %s\n", task->comm);			
 
@@ -96,7 +95,7 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 						mm->start_data, mm->end_data, 
 						(mm->end_data - mm->start_data));
 
-				pr_info("Process heap addr: 0x%lx ~ 0x%lx (Size: %lu )\n", 
+				pr_info("Process heap addr: 0x%lx ~ 0x%lx (Size: %lu B)\n", 
 						mm->start_brk, mm->brk, 
 						(mm->brk - mm->start_brk) );
 
