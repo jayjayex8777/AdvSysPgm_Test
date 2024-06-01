@@ -73,19 +73,63 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
                   unsigned int ioctl_num,       /* number and param for ioctl */
                   unsigned long ioctl_param)
 {
-        msleep(100);
-        pr_info("\n\n");
+	msleep(100);
+	pr_info("\n\n");
 
-        switch (ioctl_num) {
-        /* fill the body with cases */
-                case IOCTL_PROCINFO:
-                        pr_info("jit ioctl test \n");
-                break;
-        }
+	switch (ioctl_num) {
+	/* fill the body with cases */
+		case IOCTL_PROCINFO:
+		{
+			pr_info("jit ioctl test\n");
 
-        pr_info("\n\n");
+			struct task_struct *task = current;
+			struct mm_struct *mm = task->mm;
+			struct vm_area_struct *vma = NULL;
 
-        return 0;
+			unsigned long code_start = 0, code_end = 0;
+			unsigned long data_start = 0, data_end = 0;
+			unsigned long heap_start = 0, heap_end = 0;
+			unsigned long stack_start = 0, stack_end = 0;
+
+			down_read(&mm->mmap_sem);
+
+			for (vma = mm->mmap; vma; vma = vma->vm_next) {
+				if (vma->vm_start <= mm->start_code && mm->end_code <= vma->vm_end) {
+					code_start = vma->vm_start;
+					code_end = vma->vm_end;
+				}
+
+				if (vma->vm_start <= mm->start_data && mm->end_data <= vma->vm_end) {
+					data_start = vma->vm_start;
+					data_end = vma->vm_end;
+				}
+
+				if (vma->vm_start <= mm->start_brk && mm->brk <= vma->vm_end) {
+					heap_start = vma->vm_start;
+					heap_end = vma->vm_end;
+				}
+
+				if (vma->vm_start <= mm->start_stack && mm->start_stack <= vma->vm_end) {
+					stack_start = vma->vm_start;
+					stack_end = vma->vm_end;
+				}
+			}
+
+			up_read(&mm->mmap_sem);
+
+			pr_info("Process ID: %d, Process Name: %s\n", task->pid, task->comm);
+			pr_info("Code Area: Start = 0x%lx, End = 0x%lx, Size = %lu KB\n", code_start, code_end, (code_end - code_start) / 1024);
+			pr_info("Data Area: Start = 0x%lx, End = 0x%lx, Size = %lu KB\n", data_start, data_end, (data_end - data_start) / 1024);
+			pr_info("Heap Area: Start = 0x%lx, End = 0x%lx, Size = %lu KB\n", heap_start, heap_end, (heap_end - heap_start) / 1024);
+			pr_info("Stack Area: Start = 0x%lx, End = 0x%lx, Size = %lu KB\n", stack_start, stack_end, (stack_end - stack_start) / 1024);
+		}
+		
+		break;
+	}
+
+	pr_info("\n\n");
+
+	return 0;
 }
 
 /* Module Declarations */
@@ -166,4 +210,8 @@ module_init(chardev_init_module);
 module_exit(chardev_cleanup_module);
 
 MODULE_LICENSE("GPL");
+
+
+
+
 
