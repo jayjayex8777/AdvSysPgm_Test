@@ -88,21 +88,20 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 			pr_info("Process name: %s\n", task->comm);			
 
 			if (mm) {
-				pr_info("Process code addr: 0x%lx - 0x%lx (Size: %lu B)\n", 
+				pr_info("Process code addr: 0x%lx ~ 0x%lx (Size: %lu B)\n", 
 						mm->start_code, mm->end_code, 
 						(mm->end_code - mm->start_code));
 
-				pr_info("Process data addr: 0x%lx - 0x%lx (Size: %lu B)\n", 
+				pr_info("Process data addr: 0x%lx ~ 0x%lx (Size: %lu B)\n", 
 						mm->start_data, mm->end_data, 
 						(mm->end_data - mm->start_data));
 
-				pr_info("Process heap addr: 0x%lx - 0x%lx (Size: %lu )\n", 
+				pr_info("Process heap addr: 0x%lx ~ 0x%lx (Size: %lu )\n", 
 						mm->start_brk, mm->brk, 
 						(mm->brk - mm->start_brk) );
 
-				pr_info("Process stack addr: 0x%lx (Approx Size: %lu KB)\n", 
-						mm->start_stack, 
-						(mm->start_stack - task->thread.sp) / 1024);
+				pr_info("Process stack addr: 0x%lx \n", mm->start_stack);
+				
 			} else {
 				pr_info("No memory management structure available\n");
 			}
