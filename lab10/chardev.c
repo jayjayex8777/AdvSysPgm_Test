@@ -138,6 +138,21 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 				}
 				pr_info("Total VMA address space: %luK\n", total_vm_size / 1024);
 
+				pr_info("Process code addr: 0x%lx ~ 0x%lx (Size: %luK)\n", 
+						mm->start_code, mm->end_code, 
+						(mm->end_code - mm->start_code) / 1024);
+
+				pr_info("Process data addr: 0x%lx ~ 0x%lx (Size: %luK)\n", 
+						mm->start_data, mm->end_data, 
+						(mm->end_data - mm->start_data) / 1024);
+
+				pr_info("Process heap addr: 0x%lx ~ 0x%lx (Size: %luK)\n", 
+						mm->start_brk, mm->brk, 
+						(mm->brk - mm->start_brk) / 1024 );
+
+				pr_info("Process stack addr: 0x%lx (Top of stack)\n", mm->start_stack);
+				
+
 				
 			}
 			else {
@@ -231,4 +246,5 @@ module_init(chardev_init_module);
 module_exit(chardev_cleanup_module);
 
 MODULE_LICENSE("GPL");
+
 
