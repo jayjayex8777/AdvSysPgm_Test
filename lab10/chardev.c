@@ -183,7 +183,7 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 					total_vm_size += (vma->vm_end - vma->vm_start);
 
 					/* Identify code segment */
-					if ((vma->vm_flags & VM_EXEC) && (vma->vm_flags & VM_READ)) {
+					if (vma->vm_start <= mm->start_code && vma->vm_end >= mm->end_code) {
 						code_size += (vma->vm_end - vma->vm_start);
 						if (!code_start) code_start = vma->vm_start;
 						code_end = vma->vm_end;
