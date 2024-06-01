@@ -80,53 +80,45 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 	/* fill the body with cases */
 		case IOCTL_PROCINFO:
 		{
-			pr_info("jit ioctl test\n");
-
 			struct task_struct *task = current;
 			struct mm_struct *mm = task->mm;
-			struct vm_area_struct *vma = NULL;
 
-			unsigned long code_start = 0, code_end = 0;
-			unsigned long data_start = 0, data_end = 0;
-			unsigned long heap_start = 0, heap_end = 0;
-			unsigned long stack_start = 0, stack_end = 0;
+			pr_info("Process calling ioctl:\n");
+			pr_info("PID: %d\n", task->pid);
+			pr_info("Comm: %s\n", task->comm);
+			pr_info("State: %ld\n", task->state);
+			pr_info("Parent PID: %d\n", task->parent->pid);
 
-			down_read(&mm->mmap_lock);
+			if (mm) {
+				pr_info("Code Area: 0x%lx - 0x%lx (Size: %lu KB)\n", 
+						mm->start_code, mm->end_code, 
+						(mm->end_code - mm->start_code) / 1024);
 
-			for (vma = mm->mmap; vma; vma = vma->vm_next) {
-				if (vma->vm_start <= mm->start_code && mm->end_code <= vma->vm_end) {
-					code_start = vma->vm_start;
-					code_end = vma->vm_end;
-				}
+				pr_info("Data Area: 0x%lx - 0x%lx (Size: %lu KB)\n", 
+						mm->start_data, mm->end_data, 
+						(mm->end_data - mm->start_data) / 1024);
 
-				if (vma->vm_start <= mm->start_data && mm->end_data <= vma->vm_end) {
-					data_start = vma->vm_start;
-					data_end = vma->vm_end;
-				}
+				pr_info("Heap Area: 0x%lx - 0x%lx (Size: %lu KB)\n", 
+						mm->start_brk, mm->brk, 
+						(mm->brk - mm->start_brk) / 1024);
 
-				if (vma->vm_start <= mm->start_brk && mm->brk <= vma->vm_end) {
-					heap_start = vma->vm_start;
-					heap_end = vma->vm_end;
-				}
+				pr_info("Stack Area: 0x%lx (Approx Size: %lu KB)\n", 
+						mm->start_stack, 
+						(mm->start_stack - task->thread.sp) / 1024);
 
-				if (vma->vm_start <= mm->start_stack && mm->start_stack <= vma->vm_end) {
-					stack_start = vma->vm_start;
-					stack_end = vma->vm_end;
-				}
+				pr_info("Start Code: 0x%lx\n", mm->start_code);
+				pr_info("End Code: 0x%lx\n", mm->end_code);
+				pr_info("Start Data: 0x%lx\n", mm->start_data);
+				pr_info("End Data: 0x%lx\n", mm->end_data);
+				pr_info("Start Brk: 0x%lx\n", mm->start_brk);
+				pr_info("Brk: 0x%lx\n", mm->brk);
+				pr_info("Start Stack: 0x%lx\n", mm->start_stack);
+			} else {
+				pr_info("No memory management structure available\n");
 			}
-
-			up_read(&mm->mmap_lock);
-
-			pr_info("Process ID: %d, Process Name: %s\n", task->pid, task->comm);
-			pr_info("Code Area: Start = 0x%lx, End = 0x%lx, Size = %lu KB\n", code_start, code_end, (code_end - code_start) / 1024);
-			pr_info("Data Area: Start = 0x%lx, End = 0x%lx, Size = %lu KB\n", data_start, data_end, (data_end - data_start) / 1024);
-			pr_info("Heap Area: Start = 0x%lx, End = 0x%lx, Size = %lu KB\n", heap_start, heap_end, (heap_end - heap_start) / 1024);
-			pr_info("Stack Area: Start = 0x%lx, End = 0x%lx, Size = %lu KB\n", stack_start, stack_end, (stack_end - stack_start) / 1024);
+			break;
 		}
-		
-		break;
 	}
-
 	pr_info("\n\n");
 
 	return 0;
