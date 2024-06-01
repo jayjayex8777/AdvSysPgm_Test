@@ -86,33 +86,26 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 			pr_info("Process calling ioctl:\n");
 			pr_info("PID: %d\n", task->pid);
 			pr_info("Comm: %s\n", task->comm);
-			pr_info("State: %ld\n", task->state);
+			pr_info("State: %ld\n", task->stats);
 			pr_info("Parent PID: %d\n", task->parent->pid);
 
 			if (mm) {
-				pr_info("Code Area: 0x%lx - 0x%lx (Size: %lu KB)\n", 
+				pr_info("Code Area: 0x%lx - 0x%lx (Size: %lu B)\n", 
 						mm->start_code, mm->end_code, 
-						(mm->end_code - mm->start_code) / 1024);
+						(mm->end_code - mm->start_code));
 
-				pr_info("Data Area: 0x%lx - 0x%lx (Size: %lu KB)\n", 
+				pr_info("Data Area: 0x%lx - 0x%lx (Size: %lu B)\n", 
 						mm->start_data, mm->end_data, 
-						(mm->end_data - mm->start_data) / 1024);
+						(mm->end_data - mm->start_data));
 
-				pr_info("Heap Area: 0x%lx - 0x%lx (Size: %lu KB)\n", 
+				pr_info("Heap Area: 0x%lx - 0x%lx (Size: %lu )\n", 
 						mm->start_brk, mm->brk, 
-						(mm->brk - mm->start_brk) / 1024);
+						(mm->brk - mm->start_brk) );
 
 				pr_info("Stack Area: 0x%lx (Approx Size: %lu KB)\n", 
 						mm->start_stack, 
 						(mm->start_stack - task->thread.sp) / 1024);
 
-				pr_info("Start Code: 0x%lx\n", mm->start_code);
-				pr_info("End Code: 0x%lx\n", mm->end_code);
-				pr_info("Start Data: 0x%lx\n", mm->start_data);
-				pr_info("End Data: 0x%lx\n", mm->end_data);
-				pr_info("Start Brk: 0x%lx\n", mm->start_brk);
-				pr_info("Brk: 0x%lx\n", mm->brk);
-				pr_info("Start Stack: 0x%lx\n", mm->start_stack);
 			} else {
 				pr_info("No memory management structure available\n");
 			}
