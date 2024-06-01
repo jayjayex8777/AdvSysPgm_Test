@@ -136,7 +136,7 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 					}
 					total_vm_size += (vma->vm_end - vma->vm_start);
 				}
-				pr_info("Total VM Size: %luK\n", total_vm_size / 1024);
+				pr_info("Total VMA address space: %luK\n", total_vm_size / 1024);
 
 				
 			}
