@@ -153,6 +153,21 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 			struct mm_struct *mm = task->mm;
 
 			if (mm) {
+				// Print ranges and sizes of code, data, heap, and stack
+				pr_info("Process code addr: 0x%lx ~ 0x%lx (Size: %luK)\n", 
+						mm->start_code, mm->end_code, 
+						(mm->end_code - mm->start_code) / 1024);
+
+				pr_info("Process data addr: 0x%lx ~ 0x%lx (Size: %luK)\n", 
+						mm->start_data, mm->end_data, 
+						(mm->end_data - mm->start_data) / 1024);
+
+				pr_info("Process heap addr: 0x%lx ~ 0x%lx (Size: %luK)\n", 
+						mm->start_brk, mm->brk, 
+						(mm->brk - mm->start_brk) / 1024 );
+
+				pr_info("Process stack addr: 0x%lx (Top of stack)\n", mm->start_stack);
+
 				pr_info("Current memory mappings:\n");
 				struct vma_iterator vmi;
 				struct vm_area_struct *vma;
@@ -177,22 +192,7 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 					}
 					total_vm_size += (vma->vm_end - vma->vm_start);
 				}
-				pr_info("Total VMA address space: %luK\n", total_vm_size / 1024);
-
-				// Print ranges and sizes of code, data, heap, and stack
-				pr_info("Process code addr: 0x%lx ~ 0x%lx (Size: %luK)\n", 
-						mm->start_code, mm->end_code, 
-						(mm->end_code - mm->start_code) / 1024);
-
-				pr_info("Process data addr: 0x%lx ~ 0x%lx (Size: %luK)\n", 
-						mm->start_data, mm->end_data, 
-						(mm->end_data - mm->start_data) / 1024);
-
-				pr_info("Process heap addr: 0x%lx ~ 0x%lx (Size: %luK)\n", 
-						mm->start_brk, mm->brk, 
-						(mm->brk - mm->start_brk) / 1024 );
-
-				pr_info("Process stack addr: 0x%lx (Top of stack)\n", mm->start_stack);
+				pr_info("Total VMA address space: %luK\n", total_vm_size / 1024);		
 
 				
 			}
@@ -228,4 +228,63 @@ static struct class *chardev_class;
 static struct cdev cdev;
 #define chardev_major 295
 #define chardev_minor 0
+
+void chardev_cleanup_module(void)
+{
+        device_destroy(chardev_class, MKDEV(chardev_major, chardev_minor));
+        unregister_chrdev_region(MKDEV(chardev_major, chardev_minor), 1);
+        cdev_del(&cdev);
+        class_destroy(chardev_class);
+}
+
+int chardev_init_module(void)
+{
+        struct device *chardev_reg_device;
+        int ret;
+
+        chardev_class = class_create(THIS_MODULE, DEVICE_NAME);
+        if (IS_ERR(chardev_class)) {
+                ret = PTR_ERR(chardev_class);
+                pr_warn("Failed to register class chardev\n");
+                goto error0;
+        }
+
+        cdev_init(&cdev, &chardev_fops);
+        cdev.owner = THIS_MODULE;
+        ret = cdev_add(&cdev, MKDEV(chardev_major, chardev_minor), 1);
+        if (ret) {
+                pr_warn("Failed to add cdev for /dev/chardev\n");
+                goto error1;
+        }
+
+        ret = register_chrdev_region(MKDEV(chardev_major, chardev_minor), 1, DEVICE_NAME);
+        if (ret < 0) {
+                pr_warn("can't get major/minor %d/%d\n", chardev_major, chardev_minor);
+                goto error2;
+        }
+
+        chardev_reg_device = device_create(chardev_class, NULL, MKDEV(chardev_major, chardev_minor), NULL, DEVICE_NAME);
+
+        if (IS_ERR(chardev_reg_device)) {
+                pr_warn("Failed to create chardev device\n");
+                goto error3;
+        }
+
+        return 0;
+
+ error3:
+        unregister_chrdev_region(MKDEV(chardev_major, chardev_minor), 1);
+ error2:
+        cdev_del(&cdev);
+ error1:
+        class_destroy(chardev_class);
+ error0:
+
+        return -EINVAL;
+}
+
+module_init(chardev_init_module);
+module_exit(chardev_cleanup_module);
+
+MODULE_LICENSE("GPL");
 
