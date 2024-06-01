@@ -122,13 +122,13 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 
 					if (vma->vm_file) {
 						char *path = d_path(&vma->vm_file->f_path, name_buf, sizeof(name_buf));
-						pr_info("0x%lx,	%lu K, %c%c%c, %s\n",
+						pr_info("0x%lx %luK %c%c%c %s\n",
 						vma->vm_start, (vma->vm_end - vma->vm_start) / 1024, 
 						(vma->vm_flags & VM_READ) ? 'r' : '-',	(vma->vm_flags & VM_WRITE) ? 'w' : '-',
 						(vma->vm_flags & VM_EXEC) ? 'x' : '-', IS_ERR(path) ? "Unknown" : path);				
 					} 
 					else {
-						pr_info("0x%lx,	%lu K, %c%c%c, %s\n",
+						pr_info("0x%lx %luK %c%c%c %s\n",
 							vma->vm_start, (vma->vm_end - vma->vm_start) / 1024,
 							(vma->vm_flags & VM_READ) ? 'r' : '-',	(vma->vm_flags & VM_WRITE) ? 'w' : '-',
 							(vma->vm_flags & VM_EXEC) ? 'x' : '-',	name_buf);
