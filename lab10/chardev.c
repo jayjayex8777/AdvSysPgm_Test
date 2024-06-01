@@ -136,22 +136,7 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 					}
 					total_vm_size += (vma->vm_end - vma->vm_start);
 				}
-				pr_info("Total VMA address space: %luK\n", total_vm_size / 1024);
-
-				pr_info("Process code addr: 0x%lx ~ 0x%lx (Size: %luK)\n", 
-						mm->start_code, mm->end_code, 
-						(mm->end_code - mm->start_code) / 1024);
-
-				pr_info("Process data addr: 0x%lx ~ 0x%lx (Size: %luK)\n", 
-						mm->start_data, mm->end_data, 
-						(mm->end_data - mm->start_data) / 1024);
-
-				pr_info("Process heap addr: 0x%lx ~ 0x%lx (Size: %luK)\n", 
-						mm->start_brk, mm->brk, 
-						(mm->brk - mm->start_brk) / 1024 );
-
-				pr_info("Process stack addr: 0x%lx (Top of stack)\n", mm->start_stack);
-				
+				pr_info("Total VMA address space: %luK\n", total_vm_size / 1024);		
 
 				
 			}
@@ -161,6 +146,47 @@ long device_ioctl(struct file *file,    /* see include/linux/fs.h */
 
 			break;
 		}	
+		
+		case IOCTL_VMAINFO:
+		{
+			struct task_struct *task = current;
+			struct mm_struct *mm = task->mm;
+			struct vma_iterator vmi;
+			struct vm_area_struct *vma;
+			unsigned long total_vm_size = 0;
+
+			if (mm) {
+				pr_info("Current memory mappings:\n");
+				vma_iter_init(&vmi, mm, 0);
+				for_each_vma(vmi, vma) {
+
+					char name_buf[256] = "[ anon ]";
+
+					if (vma->vm_file) {
+						char *path = d_path(&vma->vm_file->f_path, name_buf, sizeof(name_buf));
+						pr_info("0x%lx %luK %c%c%c %s\n",
+						vma->vm_start, (vma->vm_end - vma->vm_start) / 1024, 
+						(vma->vm_flags & VM_READ) ? 'r' : '-',	(vma->vm_flags & VM_WRITE) ? 'w' : '-',
+						(vma->vm_flags & VM_EXEC) ? 'x' : '-', IS_ERR(path) ? "Unknown" : path);				
+					} 
+					else {
+						pr_info("0x%lx %luK %c%c%c %s\n",
+							vma->vm_start, (vma->vm_end - vma->vm_start) / 1024,
+							(vma->vm_flags & VM_READ) ? 'r' : '-',	(vma->vm_flags & VM_WRITE) ? 'w' : '-',
+							(vma->vm_flags & VM_EXEC) ? 'x' : '-',	name_buf);
+					}
+					total_vm_size += (vma->vm_end - vma->vm_start);
+				}
+				pr_info("Total VMA address space: %luK\n", total_vm_size / 1024);		
+
+				
+			}
+			else {
+				pr_info("No memory management structure available\n");
+			}
+
+			break;
+		}
 		
 	}
 	pr_info("\n\n");
