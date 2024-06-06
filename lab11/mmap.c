@@ -67,6 +67,7 @@ static vm_fault_t mmap_fault(struct vm_fault *vmf)
         }
 
         // TODO: Write data to the page
+        strcpy(mem,"Hello world from Intae Jun");
         pr_info("%s: returning \"%s\"\n", __func__, mem);
         msleep(100);
 
